@@ -1,21 +1,18 @@
 # Render Blueprint for iFlow
 # This file defines the infrastructure for deploying iFlow on Render.com
 
-services:
-  # PostgreSQL Database
-  - type: pserv
-    name: iflow-db
-    env: docker
+databases:
+  - name: iflow-db
+    databaseName: iflow
+    user: iflow_user
     plan: starter
     region: oregon
-    databaseName: iflow
-    databaseUser: iflow_user
-    ipAllowList: []
 
+services:
   # Web Service (Backend + Frontend)
   - type: web
     name: iflow-web
-    env: node
+    runtime: node
     region: oregon
     plan: starter
     buildCommand: npm install && npm run build
