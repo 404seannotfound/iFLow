@@ -116,4 +116,40 @@ router.post('/:eventId/rsvp', authenticateToken, async (req, res) => {
   }
 });
 
+// Update event
+router.put('/:eventId', authenticateToken, async (req, res) => {
+  const { title, description, location, latitude, longitude, startTime, endTime, maxAttendees, hubId, isFireEvent } = req.body;
+
+  try {
+    // Check if user owns the event
+    const ownerCheck = await query(
+      'SELECT user_id FROM events WHERE id = $1',
+      [req.params.eventId]
+    );
+
+    if (ownerCheck.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Event not found' } });
+    }
+
+    if (ownerCheck.rows[0].user_id !== req.user.userId) {
+      return res.status(403).json({ error: { message: 'You can only edit your own events' } });
+    }
+
+    const result = await query(
+      `UPDATE events 
+       SET title = $1, description = $2, location = $3, latitude = $4, longitude = $5,
+           start_time = $6, end_time = $7, max_participants = $8, hub_id = $9, is_fire_event = $10,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $11
+       RETURNING *`,
+      [title, description, location, latitude, longitude, startTime, endTime, maxAttendees, hubId, isFireEvent, req.params.eventId]
+    );
+
+    res.json({ event: result.rows[0] });
+  } catch (error) {
+    console.error('Update event error:', error);
+    res.status(500).json({ error: { message: 'Failed to update event' } });
+  }
+});
+
 export default router;

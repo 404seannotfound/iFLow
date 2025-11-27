@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, MapPin, Clock, Users, Map, MessageCircle } from 'lucide-react';
+import { Calendar, Plus, MapPin, Clock, Users, Map, MessageCircle, Edit2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import MapPicker from '../components/MapPicker';
@@ -14,17 +14,31 @@ export default function Events() {
   const [showMap, setShowMap] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [editingEvent, setEditingEvent] = useState(null);
+  
+  const getDefaultStartTime = () => {
+    const now = new Date();
+    now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15); // Round to next 15 min
+    return now.toISOString().slice(0, 16);
+  };
+  
+  const getDefaultEndTime = (startTime) => {
+    const start = new Date(startTime || Date.now());
+    start.setHours(start.getHours() + 1);
+    return start.toISOString().slice(0, 16);
+  };
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     location: '',
     latitude: null,
     longitude: null,
-    start_time: '',
-    end_time: '',
+    start_time: getDefaultStartTime(),
+    end_time: getDefaultEndTime(getDefaultStartTime()),
     max_participants: ''
   });
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
 
   useEffect(() => {
     loadEvents();
@@ -141,6 +155,60 @@ export default function Events() {
     }
   };
 
+  const handleEditEvent = (event) => {
+    setEditingEvent(event.id);
+    setFormData({
+      title: event.title,
+      description: event.description || '',
+      location: event.location,
+      latitude: event.latitude,
+      longitude: event.longitude,
+      start_time: new Date(event.start_time).toISOString().slice(0, 16),
+      end_time: new Date(event.end_time).toISOString().slice(0, 16),
+      max_participants: event.max_participants || ''
+    });
+    setShowCreateForm(true);
+  };
+
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        startTime: formData.start_time,
+        endTime: formData.end_time,
+        maxAttendees: formData.max_participants ? parseInt(formData.max_participants) : null,
+        hubId: null,
+        isFireEvent: false
+      };
+      
+      await axios.put(`/api/events/${editingEvent}`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setShowCreateForm(false);
+      setEditingEvent(null);
+      setFormData({
+        title: '',
+        description: '',
+        location: '',
+        latitude: null,
+        longitude: null,
+        start_time: getDefaultStartTime(),
+        end_time: getDefaultEndTime(getDefaultStartTime()),
+        max_participants: ''
+      });
+      loadEvents();
+    } catch (error) {
+      console.error('Failed to update event:', error);
+      alert('Failed to update event: ' + (error.response?.data?.error?.message || error.message));
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto py-8">
@@ -171,8 +239,8 @@ export default function Events() {
 
       {showCreateForm && (
         <div className="card mb-8">
-          <h2 className="text-2xl font-bold mb-6">Create New Event</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <h2 className="text-2xl font-bold mb-6">{editingEvent ? 'Edit Event' : 'Create New Event'}</h2>
+          <form onSubmit={editingEvent ? handleUpdateEvent : handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Event Title</label>
               <input
@@ -240,7 +308,14 @@ export default function Events() {
                   type="datetime-local"
                   required
                   value={formData.start_time}
-                  onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                  onChange={(e) => {
+                    const newStartTime = e.target.value;
+                    setFormData({ 
+                      ...formData, 
+                      start_time: newStartTime,
+                      end_time: getDefaultEndTime(newStartTime)
+                    });
+                  }}
                   className="input-field"
                 />
               </div>
@@ -270,11 +345,24 @@ export default function Events() {
 
             <div className="flex gap-4">
               <button type="submit" className="btn-primary flex-1">
-                Create Event
+                {editingEvent ? 'Update Event' : 'Create Event'}
               </button>
               <button
                 type="button"
-                onClick={() => setShowCreateForm(false)}
+                onClick={() => {
+                  setShowCreateForm(false);
+                  setEditingEvent(null);
+                  setFormData({
+                    title: '',
+                    description: '',
+                    location: '',
+                    latitude: null,
+                    longitude: null,
+                    start_time: getDefaultStartTime(),
+                    end_time: getDefaultEndTime(getDefaultStartTime()),
+                    max_participants: ''
+                  });
+                }}
                 className="btn-secondary flex-1"
               >
                 Cancel
@@ -302,12 +390,21 @@ export default function Events() {
           events.map((event) => (
             <div key={event.id} className="card hover:border-purple-500/50 transition-colors">
               <div className="flex justify-between items-start mb-4">
-                <div>
+                <div className="flex-1">
                   <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
                   {event.description && (
                     <p className="text-gray-400 mb-4">{event.description}</p>
                   )}
                 </div>
+                {token && user && event.user_id === user.id && (
+                  <button
+                    onClick={() => handleEditEvent(event)}
+                    className="btn-secondary flex items-center gap-2"
+                  >
+                    <Edit2 size={16} />
+                    Edit
+                  </button>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-4">
