@@ -17,6 +17,7 @@ import postRoutes from './routes/posts.js';
 import marketplaceRoutes from './routes/marketplace.js';
 import messageRoutes from './routes/messages.js';
 import adminRoutes from './routes/admin.js';
+import commentsRoutes from './routes/comments.js';
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
+app.use('/api', commentsRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
 

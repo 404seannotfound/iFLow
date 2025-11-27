@@ -105,4 +105,45 @@ router.post('/:hubId/join', authenticateToken, async (req, res) => {
   }
 });
 
+// Get hub posts
+router.get('/:hubId/posts', optionalAuth, async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT p.*, u.username, u.display_name, u.avatar_url,
+              (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as like_count,
+              (SELECT COUNT(*) FROM post_comments WHERE post_id = p.id) as comment_count,
+              EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $2) as user_has_liked
+       FROM posts p
+       JOIN users u ON p.user_id = u.id
+       WHERE p.hub_id = $1 AND p.is_active = true
+       ORDER BY p.created_at DESC`,
+      [req.params.hubId, req.user?.userId || null]
+    );
+
+    res.json({ posts: result.rows });
+  } catch (error) {
+    console.error('Get hub posts error:', error);
+    res.status(500).json({ error: { message: 'Failed to fetch posts' } });
+  }
+});
+
+// Create hub post
+router.post('/:hubId/posts', authenticateToken, async (req, res) => {
+  const { content } = req.body;
+
+  try {
+    const result = await query(
+      `INSERT INTO posts (hub_id, user_id, content)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [req.params.hubId, req.user.userId, content]
+    );
+
+    res.status(201).json({ post: result.rows[0] });
+  } catch (error) {
+    console.error('Create post error:', error);
+    res.status(500).json({ error: { message: 'Failed to create post' } });
+  }
+});
+
 export default router;

@@ -100,6 +100,61 @@
   }
 }
 
+/* Rich Text Editor Styles */
+.rich-text-editor .ql-toolbar {
+  background: #1a1a2e;
+  border: 2px solid #4a5568;
+  border-bottom: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.rich-text-editor .ql-container {
+  background: #1a1a2e;
+  border: 2px solid #4a5568;
+  border-top: 1px solid #4a5568;
+  border-radius: 0 0 0.5rem 0.5rem;
+  color: #ffffff;
+  font-size: 1rem;
+  min-height: 150px;
+}
+
+.rich-text-editor .ql-editor {
+  color: #ffffff;
+  min-height: 150px;
+}
+
+.rich-text-editor .ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.rich-text-editor .ql-stroke {
+  stroke: #9ca3af;
+}
+
+.rich-text-editor .ql-fill {
+  fill: #9ca3af;
+}
+
+.rich-text-editor .ql-picker-label {
+  color: #9ca3af;
+}
+
+.rich-text-editor .ql-toolbar button:hover,
+.rich-text-editor .ql-toolbar button.ql-active {
+  color: #a855f7;
+}
+
+.rich-text-editor .ql-toolbar button:hover .ql-stroke,
+.rich-text-editor .ql-toolbar button.ql-active .ql-stroke {
+  stroke: #a855f7;
+}
+
+.rich-text-editor .ql-toolbar button:hover .ql-fill,
+.rich-text-editor .ql-toolbar button.ql-active .ql-fill {
+  fill: #a855f7;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

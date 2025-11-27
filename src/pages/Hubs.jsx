@@ -157,7 +157,7 @@ export default function Hubs() {
           </div>
         ) : (
           hubs.map((hub) => (
-            <div key={hub.id} className="card hover:border-green-500/50 transition-colors">
+            <Link key={hub.id} to={`/hubs/${hub.id}`} className="card hover:border-green-500/50 transition-colors block">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
@@ -196,7 +196,7 @@ export default function Hubs() {
                   {hub.member_count || 0} members
                 </div>
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>

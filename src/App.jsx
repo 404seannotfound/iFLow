@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import TheLoop from './pages/TheLoop';
 import Events from './pages/Events';
 import Hubs from './pages/Hubs';
+import HubDetail from './pages/HubDetail';
 import Marketplace from './pages/Marketplace';
 import Profile from './pages/Profile';
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="loop" element={<TheLoop />} />
         <Route path="events" element={<Events />} />
         <Route path="hubs" element={<Hubs />} />
+        <Route path="hubs/:hubId" element={<HubDetail />} />
         <Route path="marketplace" element={<Marketplace />} />
         <Route path="profile/:userId" element={<Profile />} />
       </Route>
