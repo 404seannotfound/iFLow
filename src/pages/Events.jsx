@@ -42,9 +42,24 @@ export default function Events() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/events', formData, {
+      // Convert to API format (camelCase)
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        startTime: formData.start_time,
+        endTime: formData.end_time,
+        maxAttendees: formData.max_participants ? parseInt(formData.max_participants) : null,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        hubId: null, // Optional - can be set to a specific hub
+        isFireEvent: false
+      };
+      
+      await axios.post('/api/events', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
       setShowCreateForm(false);
       setShowMap(false);
       setFormData({
@@ -60,7 +75,8 @@ export default function Events() {
       loadEvents();
     } catch (error) {
       console.error('Failed to create event:', error);
-      alert('Failed to create event: ' + (error.response?.data?.error?.message || error.message));
+      const errorMsg = error.response?.data?.error?.message || error.message;
+      alert('Failed to create event: ' + errorMsg);
     }
   };
 

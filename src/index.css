@@ -42,11 +42,28 @@
     @apply btn border-2 border-gray-700 hover:bg-gray-800 text-gray-100;
   }
 
-  .input {
-    @apply w-full px-4 py-2 bg-gray-900 border border-gray-800 rounded-lg 
-           text-gray-100 placeholder-gray-500
-           focus:outline-none focus:ring-2 focus:ring-flow-purple focus:border-transparent
+  .input, .input-field {
+    @apply w-full px-4 py-3 bg-gray-950 border-2 border-gray-700 rounded-lg 
+           text-white placeholder-gray-400 font-medium
+           focus:outline-none focus:ring-2 focus:ring-flow-purple focus:border-flow-purple
+           hover:border-gray-600
            transition-all duration-200;
+  }
+
+  .input-field:focus, .input:focus {
+    @apply bg-gray-900 border-flow-purple shadow-lg shadow-flow-purple/20;
+  }
+
+  textarea.input-field, textarea.input {
+    @apply resize-none;
+  }
+
+  select.input-field, select.input {
+    @apply cursor-pointer;
+  }
+
+  label {
+    @apply text-gray-200 font-semibold;
   }
 
   .card {
