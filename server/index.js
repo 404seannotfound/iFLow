@@ -16,6 +16,7 @@ import videoRoutes from './routes/videos.js';
 import postRoutes from './routes/posts.js';
 import marketplaceRoutes from './routes/marketplace.js';
 import messageRoutes from './routes/messages.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -61,6 +62,10 @@ app.use('/api/videos', videoRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Serve static public files (db-init.html, etc.)
+app.use(express.static(join(__dirname, '../public')));
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {

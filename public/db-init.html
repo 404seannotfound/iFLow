@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iFlow - Database Initialization</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #9ca3af;
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card h2 {
+      color: #fff;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .status.loading {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+    }
+
+    .status.success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    .status.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .status.warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-item {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-label {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      color: #fff;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .table-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .table-tag {
+      background: rgba(168, 85, 247, 0.2);
+      color: #c084fc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    .credentials {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .credentials h3 {
+      color: #4ade80;
+      margin-bottom: 15px;
+    }
+
+    .credentials code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+    }
+
+    .credentials p {
+      margin: 8px 0;
+      color: #d1d5db;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-details {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #f87171;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌊 iFlow Database</h1>
+      <p>Initialize and manage your database</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Database Status</h2>
+      <div id="status" class="status loading">
+        <span class="spinner"></span>
+        <span>Loading database status...</span>
+      </div>
+
+      <div class="stats-grid" id="statsGrid" style="display: none;">
+        <div class="stat-item">
+          <div class="stat-label">Tables</div>
+          <div class="stat-value" id="tableCount">-</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Users</div>
+          <div class="stat-value" id="userCount">-</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Hubs</div>
+          <div class="stat-value" id="hubCount">-</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Events</div>
+          <div class="stat-value" id="eventCount">-</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Videos</div>
+          <div class="stat-value" id="videoCount">-</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Posts</div>
+          <div class="stat-value" id="postCount">-</div>
+        </div>
+      </div>
+
+      <div id="tableList" style="display: none;">
+        <h3 style="color: #9ca3af; margin-bottom: 10px;">Database Tables:</h3>
+        <div class="table-list" id="tables"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Actions</h2>
+      <div class="button-group">
+        <button id="initBtn" class="btn-primary" onclick="initDatabase()">
+          🚀 Initialize Database
+        </button>
+        <button id="refreshBtn" class="btn-secondary" onclick="loadStats()">
+          🔄 Refresh Stats
+        </button>
+        <button id="resetBtn" class="btn-danger" onclick="resetDatabase()">
+          🗑️ Reset Database
+        </button>
+      </div>
+
+      <div id="credentials" class="credentials" style="display: none;">
+        <h3>✅ Database Initialized Successfully!</h3>
+        <p><strong>Username:</strong> <code id="credUsername">sean</code></p>
+        <p><strong>Email:</strong> <code id="credEmail">seansp@gmail.com</code></p>
+        <p><strong>Password:</strong> <code id="credPassword">seansean</code></p>
+        <p style="margin-top: 15px; color: #fbbf24;">⚠️ Change this password after first login!</p>
+      </div>
+
+      <div id="errorDetails" class="error-details" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    let statsInterval;
+
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/admin/stats');
+        const data = await response.json();
+
+        const statusEl = document.getElementById('status');
+        const statsGrid = document.getElementById('statsGrid');
+        const tableList = document.getElementById('tableList');
+        const initBtn = document.getElementById('initBtn');
+
+        if (data.initialized) {
+          statusEl.className = 'status success';
+          statusEl.innerHTML = '✅ Database is initialized and ready';
+          statsGrid.style.display = 'grid';
+          tableList.style.display = 'block';
+          initBtn.disabled = true;
+
+          // Update counts
+          document.getElementById('tableCount').textContent = data.tableCount || 0;
+          document.getElementById('userCount').textContent = data.counts?.users || 0;
+          document.getElementById('hubCount').textContent = data.counts?.hubs || 0;
+          document.getElementById('eventCount').textContent = data.counts?.events || 0;
+          document.getElementById('videoCount').textContent = data.counts?.videos || 0;
+          document.getElementById('postCount').textContent = data.counts?.posts || 0;
+
+          // Show tables
+          const tablesEl = document.getElementById('tables');
+          tablesEl.innerHTML = data.tables.map(t => 
+            `<span class="table-tag">${t}</span>`
+          ).join('');
+
+        } else {
+          statusEl.className = 'status warning';
+          statusEl.innerHTML = '⚠️ Database not initialized';
+          statsGrid.style.display = 'none';
+          tableList.style.display = 'none';
+          initBtn.disabled = false;
+        }
+
+      } catch (error) {
+        const statusEl = document.getElementById('status');
+        statusEl.className = 'status error';
+        statusEl.innerHTML = '❌ Error connecting to database';
+        console.error('Stats error:', error);
+      }
+    }
+
+    async function initDatabase() {
+      const initBtn = document.getElementById('initBtn');
+      const statusEl = document.getElementById('status');
+      const credentialsEl = document.getElementById('credentials');
+      const errorEl = document.getElementById('errorDetails');
+
+      initBtn.disabled = true;
+      statusEl.className = 'status loading';
+      statusEl.innerHTML = '<span class="spinner"></span> <span>Initializing database...</span>';
+      credentialsEl.style.display = 'none';
+      errorEl.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/admin/init', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+          statusEl.className = 'status success';
+          statusEl.innerHTML = '✅ Database initialized successfully!';
+          credentialsEl.style.display = 'block';
+          
+          if (data.credentials) {
+            document.getElementById('credUsername').textContent = data.credentials.username;
+            document.getElementById('credEmail').textContent = data.credentials.email;
+            document.getElementById('credPassword').textContent = data.credentials.password;
+          }
+
+          setTimeout(() => loadStats(), 1000);
+        } else {
+          throw new Error(data.error || 'Initialization failed');
+        }
+
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.innerHTML = '❌ Initialization failed';
+        errorEl.style.display = 'block';
+        errorEl.textContent = error.message;
+        initBtn.disabled = false;
+      }
+    }
+
+    async function resetDatabase() {
+      if (!confirm('⚠️ WARNING: This will delete ALL data! Are you sure?')) {
+        return;
+      }
+
+      const resetBtn = document.getElementById('resetBtn');
+      const statusEl = document.getElementById('status');
+
+      resetBtn.disabled = true;
+      statusEl.className = 'status loading';
+      statusEl.innerHTML = '<span class="spinner"></span> <span>Resetting database...</span>';
+
+      try {
+        const response = await fetch('/api/admin/reset', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+          statusEl.className = 'status success';
+          statusEl.innerHTML = '✅ Database reset successfully';
+          setTimeout(() => loadStats(), 1000);
+        } else {
+          throw new Error(data.error || 'Reset failed');
+        }
+
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.innerHTML = '❌ Reset failed: ' + error.message;
+      } finally {
+        resetBtn.disabled = false;
+      }
+    }
+
+    // Load stats on page load
+    loadStats();
+
+    // Auto-refresh every 10 seconds
+    statsInterval = setInterval(loadStats, 10000);
+  </script>
+</body>
+</html>
