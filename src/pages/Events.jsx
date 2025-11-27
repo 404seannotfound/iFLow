@@ -16,16 +16,31 @@ export default function Events() {
   const [userLocation, setUserLocation] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
   
-  const getDefaultStartTime = () => {
-    const now = new Date();
-    now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15); // Round to next 15 min
-    return now.toISOString().slice(0, 16);
+  // Helper to combine date and time into ISO string
+  const combineDateTime = (date, hour, minute) => {
+    const d = new Date(date);
+    d.setHours(parseInt(hour), parseInt(minute), 0, 0);
+    return d.toISOString();
   };
   
-  const getDefaultEndTime = (startTime) => {
-    const start = new Date(startTime || Date.now());
-    start.setHours(start.getHours() + 1);
-    return start.toISOString().slice(0, 16);
+  // Helper to extract date and time from ISO string
+  const extractDateTime = (isoString) => {
+    const d = new Date(isoString);
+    return {
+      date: d.toISOString().split('T')[0],
+      hour: d.getHours().toString().padStart(2, '0'),
+      minute: d.getMinutes().toString().padStart(2, '0')
+    };
+  };
+  
+  const getDefaultDateTime = () => {
+    const now = new Date();
+    now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15); // Round to next 15 min
+    return {
+      date: now.toISOString().split('T')[0],
+      hour: now.getHours().toString().padStart(2, '0'),
+      minute: now.getMinutes().toString().padStart(2, '0')
+    };
   };
   
   const [formData, setFormData] = useState({
@@ -34,8 +49,12 @@ export default function Events() {
     location: '',
     latitude: null,
     longitude: null,
-    start_time: '',
-    end_time: '',
+    start_date: '',
+    start_hour: '18',
+    start_minute: '00',
+    end_date: '',
+    end_hour: '20',
+    end_minute: '00',
     max_participants: ''
   });
   const { token, user } = useAuthStore();
@@ -105,17 +124,17 @@ export default function Events() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Convert to API format (camelCase)
+      const startTime = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
+      const endTime = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
+      
       const payload = {
         title: formData.title,
         description: formData.description,
         location: formData.location,
-        startTime: formData.start_time,
-        endTime: formData.end_time,
+        startTime,
+        endTime,
         maxAttendees: formData.max_participants ? parseInt(formData.max_participants) : null,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-        hubId: null, // Optional - can be set to a specific hub
+        hubId: null,
         isFireEvent: false
       };
       
@@ -131,8 +150,12 @@ export default function Events() {
         location: '',
         latitude: null,
         longitude: null,
-        start_time: '',
-        end_time: '',
+        start_date: '',
+        start_hour: '18',
+        start_minute: '00',
+        end_date: '',
+        end_hour: '20',
+        end_minute: '00',
         max_participants: ''
       });
       loadEvents();
@@ -157,14 +180,20 @@ export default function Events() {
 
   const handleEditEvent = (event) => {
     setEditingEvent(event.id);
+    const startDT = extractDateTime(event.start_time);
+    const endDT = extractDateTime(event.end_time);
     setFormData({
       title: event.title,
       description: event.description || '',
       location: event.location,
       latitude: null,
       longitude: null,
-      start_time: new Date(event.start_time).toISOString().slice(0, 16),
-      end_time: new Date(event.end_time).toISOString().slice(0, 16),
+      start_date: startDT.date,
+      start_hour: startDT.hour,
+      start_minute: startDT.minute,
+      end_date: endDT.date,
+      end_hour: endDT.hour,
+      end_minute: endDT.minute,
       max_participants: event.max_attendees || ''
     });
     setShowCreateForm(true);
@@ -173,12 +202,15 @@ export default function Events() {
   const handleUpdateEvent = async (e) => {
     e.preventDefault();
     try {
+      const startTime = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
+      const endTime = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
+      
       const payload = {
         title: formData.title,
         description: formData.description,
         location: formData.location,
-        startTime: formData.start_time,
-        endTime: formData.end_time,
+        startTime,
+        endTime,
         maxAttendees: formData.max_participants ? parseInt(formData.max_participants) : null,
         hubId: null,
         isFireEvent: false
@@ -228,15 +260,22 @@ export default function Events() {
           <button
             onClick={() => {
               if (!showCreateForm) {
-                // Set default times when opening form
+                const defaultStart = getDefaultDateTime();
+                const defaultEnd = getDefaultDateTime();
+                defaultEnd.hour = (parseInt(defaultStart.hour) + 2).toString().padStart(2, '0');
+                
                 setFormData({
                   title: '',
                   description: '',
                   location: '',
                   latitude: null,
                   longitude: null,
-                  start_time: getDefaultStartTime(),
-                  end_time: getDefaultEndTime(getDefaultStartTime()),
+                  start_date: defaultStart.date,
+                  start_hour: defaultStart.hour,
+                  start_minute: defaultStart.minute,
+                  end_date: defaultEnd.date,
+                  end_hour: defaultEnd.hour,
+                  end_minute: defaultEnd.minute,
                   max_participants: ''
                 });
               }
@@ -314,34 +353,73 @@ export default function Events() {
               />
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Start Time</label>
+            {/* Start Date & Time */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Start Date & Time</label>
+              <div className="grid grid-cols-3 gap-3">
                 <input
-                  type="datetime-local"
+                  type="date"
                   required
-                  value={formData.start_time}
-                  onChange={(e) => {
-                    const newStartTime = e.target.value;
-                    setFormData({ 
-                      ...formData, 
-                      start_time: newStartTime,
-                      end_time: getDefaultEndTime(newStartTime)
-                    });
-                  }}
-                  className="input-field"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  className="input-field col-span-2"
                 />
+                <div className="flex gap-2">
+                  <select
+                    value={formData.start_hour}
+                    onChange={(e) => setFormData({ ...formData, start_hour: e.target.value })}
+                    className="input-field flex-1"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="text-2xl text-gray-400">:</span>
+                  <select
+                    value={formData.start_minute}
+                    onChange={(e) => setFormData({ ...formData, start_minute: e.target.value })}
+                    className="input-field flex-1"
+                  >
+                    {['00', '15', '30', '45'].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">End Time</label>
+            {/* End Date & Time */}
+            <div>
+              <label className="block text-sm font-medium mb-2">End Date & Time</label>
+              <div className="grid grid-cols-3 gap-3">
                 <input
-                  type="datetime-local"
+                  type="date"
                   required
-                  value={formData.end_time}
-                  onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                  className="input-field"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  className="input-field col-span-2"
                 />
+                <div className="flex gap-2">
+                  <select
+                    value={formData.end_hour}
+                    onChange={(e) => setFormData({ ...formData, end_hour: e.target.value })}
+                    className="input-field flex-1"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="text-2xl text-gray-400">:</span>
+                  <select
+                    value={formData.end_minute}
+                    onChange={(e) => setFormData({ ...formData, end_minute: e.target.value })}
+                    className="input-field flex-1"
+                  >
+                    {['00', '15', '30', '45'].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -421,7 +499,7 @@ export default function Events() {
                     <p className="text-gray-400 mb-4">{event.description}</p>
                   )}
                 </div>
-                {token && user && event.created_by === user.userId && (
+                {token && user && event.created_by === user.id && (
                   <button
                     onClick={() => handleEditEvent(event)}
                     className="btn-secondary flex items-center gap-2"
