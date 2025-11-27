@@ -21,6 +21,10 @@ router.get('/', async (req, res) => {
     res.json({ templates, details: result.rows });
   } catch (error) {
     console.error('Get templates error:', error);
+    // If table doesn't exist yet, return empty templates
+    if (error.message && error.message.includes('does not exist')) {
+      return res.json({ templates: {}, details: [] });
+    }
     res.status(500).json({ error: { message: 'Failed to fetch templates' } });
   }
 });
