@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, MapPin, Clock, Users } from 'lucide-react';
+import { Calendar, Plus, MapPin, Clock, Users, Map } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
+import MapPicker from '../components/MapPicker';
+import MiniMap from '../components/MiniMap';
 
 export default function Events() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     location: '',
+    latitude: null,
+    longitude: null,
     start_time: '',
     end_time: '',
     max_participants: ''
@@ -39,10 +44,13 @@ export default function Events() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowCreateForm(false);
+      setShowMap(false);
       setFormData({
         title: '',
         description: '',
         location: '',
+        latitude: null,
+        longitude: null,
         start_time: '',
         end_time: '',
         max_participants: ''
@@ -123,15 +131,40 @@ export default function Events() {
 
             <div>
               <label className="block text-sm font-medium mb-2">Location</label>
-              <input
-                type="text"
-                required
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="input-field"
-                placeholder="Central Park, NYC"
-              />
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  required
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="input-field"
+                  placeholder="Central Park, NYC"
+                  readOnly={showMap}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowMap(!showMap)}
+                  className="btn-secondary w-full flex items-center justify-center gap-2"
+                >
+                  <Map size={18} />
+                  {showMap ? 'Hide Map' : 'Pick Location on Map'}
+                </button>
+              </div>
             </div>
+
+            {showMap && (
+              <MapPicker
+                onLocationSelect={(location) => {
+                  setFormData({
+                    ...formData,
+                    location: location.address,
+                    latitude: location.lat,
+                    longitude: location.lng
+                  });
+                }}
+                initialPosition={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : null}
+              />
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -226,6 +259,10 @@ export default function Events() {
                   </div>
                 )}
               </div>
+
+              {event.latitude && event.longitude && (
+                <MiniMap latitude={event.latitude} longitude={event.longitude} />
+              )}
 
               {token && (
                 <div className="flex gap-2">
