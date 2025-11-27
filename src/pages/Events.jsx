@@ -34,8 +34,8 @@ export default function Events() {
     location: '',
     latitude: null,
     longitude: null,
-    start_time: getDefaultStartTime(),
-    end_time: getDefaultEndTime(getDefaultStartTime()),
+    start_time: '',
+    end_time: '',
     max_participants: ''
   });
   const { token, user } = useAuthStore();
@@ -228,7 +228,22 @@ export default function Events() {
         </div>
         {token && (
           <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
+            onClick={() => {
+              if (!showCreateForm) {
+                // Set default times when opening form
+                setFormData({
+                  title: '',
+                  description: '',
+                  location: '',
+                  latitude: null,
+                  longitude: null,
+                  start_time: getDefaultStartTime(),
+                  end_time: getDefaultEndTime(getDefaultStartTime()),
+                  max_participants: ''
+                });
+              }
+              setShowCreateForm(!showCreateForm);
+            }}
             className="btn-primary flex items-center gap-2"
           >
             <Plus size={20} />
@@ -379,7 +394,19 @@ export default function Events() {
             <p className="text-gray-400 mb-4">No events yet</p>
             {token && (
               <button
-                onClick={() => setShowCreateForm(true)}
+                onClick={() => {
+                  setFormData({
+                    title: '',
+                    description: '',
+                    location: '',
+                    latitude: null,
+                    longitude: null,
+                    start_time: getDefaultStartTime(),
+                    end_time: getDefaultEndTime(getDefaultStartTime()),
+                    max_participants: ''
+                  });
+                  setShowCreateForm(true);
+                }}
                 className="btn-primary mx-auto"
               >
                 Create the first event
