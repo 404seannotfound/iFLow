@@ -299,7 +299,7 @@ router.post('/test-data', async (req, res) => {
 
     // Create 2 hubs
     const sfHub = await query(
-      `INSERT INTO hubs (name, description, location, latitude, longitude, creator_id)
+      `INSERT INTO hubs (name, description, location, latitude, longitude, created_by)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
       [
@@ -313,7 +313,7 @@ router.post('/test-data', async (req, res) => {
     );
 
     const canaryHub = await query(
-      `INSERT INTO hubs (name, description, location, latitude, longitude, creator_id)
+      `INSERT INTO hubs (name, description, location, latitude, longitude, created_by)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
       [
@@ -347,16 +347,14 @@ router.post('/test-data', async (req, res) => {
     
     // Thanksgiving dinner in Leavenworth, WA (tonight 6-8:30 PM PST)
     await query(
-      `INSERT INTO events (user_id, hub_id, title, description, location, latitude, longitude, start_time, end_time, max_participants, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, max_attendees, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         users[0].id,
         sfHub.rows[0].id,
         'Thanksgiving Flow Dinner',
         'Join us for a potluck Thanksgiving dinner followed by evening flow session!',
         'Leavenworth, WA',
-        47.5962,
-        -120.6615,
         tonight.toISOString(),
         new Date(tonight.getTime() + 2.5 * 60 * 60 * 1000).toISOString(), // 8:30 PM
         30,
@@ -369,16 +367,14 @@ router.post('/test-data', async (req, res) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(19, 0, 0, 0);
     await query(
-      `INSERT INTO events (user_id, hub_id, title, description, location, latitude, longitude, start_time, end_time, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         users[1].id,
         sfHub.rows[0].id,
         'Golden Gate Park Flow Jam',
         'Weekly flow jam at the polo fields. Bring your props and good vibes!',
         'Golden Gate Park, San Francisco',
-        37.7694,
-        -122.4862,
         tomorrow.toISOString(),
         new Date(tomorrow.getTime() + 2 * 60 * 60 * 1000).toISOString(),
         'scheduled'
@@ -403,16 +399,14 @@ router.post('/test-data', async (req, res) => {
       ];
       
       await query(
-        `INSERT INTO events (user_id, hub_id, title, description, location, latitude, longitude, start_time, end_time, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
         [
           users[i % 4].id,
           canaryHub.rows[0].id,
           titles[i],
           descriptions[i],
           'Tenerife, Canary Islands',
-          28.2916 + (Math.random() - 0.5) * 0.1,
-          -16.6291 + (Math.random() - 0.5) * 0.1,
           eventDate.toISOString(),
           new Date(eventDate.getTime() + 2 * 60 * 60 * 1000).toISOString(),
           'scheduled'
