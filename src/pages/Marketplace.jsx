@@ -23,9 +23,11 @@ export default function Marketplace() {
   const loadListings = async () => {
     try {
       const response = await axios.get('/api/marketplace');
-      setListings(response.data);
+      // API returns { listings: [...] }
+      setListings(response.data.listings || response.data || []);
     } catch (error) {
       console.error('Failed to load listings:', error);
+      setListings([]);
     } finally {
       setLoading(false);
     }

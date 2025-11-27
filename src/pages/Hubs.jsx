@@ -21,9 +21,11 @@ export default function Hubs() {
   const loadHubs = async () => {
     try {
       const response = await axios.get('/api/hubs');
-      setHubs(response.data);
+      // API returns { hubs: [...] }
+      setHubs(response.data.hubs || response.data || []);
     } catch (error) {
       console.error('Failed to load hubs:', error);
+      setHubs([]);
     } finally {
       setLoading(false);
     }

@@ -29,9 +29,11 @@ export default function Events() {
   const loadEvents = async () => {
     try {
       const response = await axios.get('/api/events');
-      setEvents(response.data);
+      // API returns { events: [...] }
+      setEvents(response.data.events || response.data || []);
     } catch (error) {
       console.error('Failed to load events:', error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }

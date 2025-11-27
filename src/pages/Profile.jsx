@@ -25,11 +25,13 @@ export default function Profile() {
       const response = await axios.get(`/api/users/${user.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProfile(response.data);
+      // API returns { user: {...} }
+      const userData = response.data.user || response.data;
+      setProfile(userData);
       setFormData({
-        display_name: response.data.display_name || '',
-        bio: response.data.bio || '',
-        location: response.data.location || ''
+        display_name: userData.display_name || '',
+        bio: userData.bio || '',
+        location: userData.location || ''
       });
     } catch (error) {
       console.error('Failed to load profile:', error);
