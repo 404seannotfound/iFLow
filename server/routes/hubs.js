@@ -118,8 +118,8 @@ router.get('/:hubId/posts', optionalAuth, async (req, res) => {
               EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $2) as user_has_liked
        FROM posts p
        JOIN users u ON p.user_id = u.id
-       WHERE p.hub_id = $1 AND p.is_active = true
-       ORDER BY p.created_at DESC`,
+       WHERE p.hub_id = $1
+       ORDER BY p.is_pinned DESC, p.created_at DESC`,
       [req.params.hubId, req.user?.userId || null]
     );
 

@@ -35,7 +35,9 @@ export default function HubDetail() {
 
   const loadPosts = async () => {
     try {
-      const response = await axios.get(`/api/hubs/${hubId}/posts`);
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const response = await axios.get(`/api/hubs/${hubId}/posts`, config);
+      console.log('Posts loaded:', response.data);
       setPosts(response.data.posts || response.data || []);
     } catch (error) {
       console.error('Failed to load posts:', error);
