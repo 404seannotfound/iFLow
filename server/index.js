@@ -32,10 +32,14 @@ app.use(helmet({
 }));
 app.use(compression());
 app.use(morgan('dev'));
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+// CORS configuration
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? true // In production, allow same origin (since frontend is served by same server)
+    : (process.env.CLIENT_URL || 'http://localhost:5173'),
   credentials: true
-}));
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
