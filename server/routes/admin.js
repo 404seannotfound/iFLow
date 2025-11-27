@@ -319,9 +319,9 @@ router.post('/test-data', async (req, res) => {
       [
         'Canary Islands Flow Community',
         'Island paradise flow arts - beach sessions and fire spinning!',
-        'Tenerife, Canary Islands',
-        28.2916,
-        -16.6291,
+        'Las Palmas, Gran Canaria',
+        28.1235,
+        -15.4363,
         users[1].id
       ]
     );
@@ -406,7 +406,7 @@ router.post('/test-data', async (req, res) => {
           canaryHub.rows[0].id,
           titles[i],
           descriptions[i],
-          'Tenerife, Canary Islands',
+          'Las Palmas, Gran Canaria',
           eventDate.toISOString(),
           new Date(eventDate.getTime() + 2 * 60 * 60 * 1000).toISOString(),
           'scheduled'
@@ -490,7 +490,7 @@ router.post('/test-data', async (req, res) => {
         description: 'Professional fire staff, 5 feet long. Great for beginners and intermediate spinners.',
         price: 75.00,
         condition: 'good',
-        location: 'Tenerife, Canary Islands'
+        location: 'Las Palmas, Gran Canaria'
       },
       {
         title: 'Hula Hoop Set (3 hoops)',
@@ -504,7 +504,7 @@ router.post('/test-data', async (req, res) => {
         description: 'Hand-sewn sock poi, great for practice. Set of 2.',
         price: 15.00,
         condition: 'new',
-        location: 'Tenerife, Canary Islands'
+        location: 'Las Palmas, Gran Canaria'
       }
     ];
 

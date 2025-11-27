@@ -23,11 +23,15 @@ export default function Events() {
     return d.toISOString();
   };
   
-  // Helper to extract date and time from ISO string
+  // Helper to extract date and time from ISO string (in local timezone)
   const extractDateTime = (isoString) => {
     const d = new Date(isoString);
+    // Get local date components
+    const year = d.getFullYear();
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
     return {
-      date: d.toISOString().split('T')[0],
+      date: `${year}-${month}-${day}`,
       hour: d.getHours().toString().padStart(2, '0'),
       minute: d.getMinutes().toString().padStart(2, '0')
     };
@@ -228,8 +232,12 @@ export default function Events() {
         location: '',
         latitude: null,
         longitude: null,
-        start_time: getDefaultStartTime(),
-        end_time: getDefaultEndTime(getDefaultStartTime()),
+        start_date: '',
+        start_hour: '18',
+        start_minute: '00',
+        end_date: '',
+        end_hour: '20',
+        end_minute: '00',
         max_participants: ''
       });
       loadEvents();
