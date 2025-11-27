@@ -118,12 +118,12 @@ router.post('/:eventId/rsvp', authenticateToken, async (req, res) => {
 
 // Update event
 router.put('/:eventId', authenticateToken, async (req, res) => {
-  const { title, description, location, latitude, longitude, startTime, endTime, maxAttendees, hubId, isFireEvent } = req.body;
+  const { title, description, location, startTime, endTime, maxAttendees, hubId, isFireEvent } = req.body;
 
   try {
     // Check if user owns the event
     const ownerCheck = await query(
-      'SELECT user_id FROM events WHERE id = $1',
+      'SELECT created_by FROM events WHERE id = $1',
       [req.params.eventId]
     );
 
@@ -131,18 +131,18 @@ router.put('/:eventId', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: { message: 'Event not found' } });
     }
 
-    if (ownerCheck.rows[0].user_id !== req.user.userId) {
+    if (ownerCheck.rows[0].created_by !== req.user.userId) {
       return res.status(403).json({ error: { message: 'You can only edit your own events' } });
     }
 
     const result = await query(
       `UPDATE events 
-       SET title = $1, description = $2, location = $3, latitude = $4, longitude = $5,
-           start_time = $6, end_time = $7, max_participants = $8, hub_id = $9, is_fire_event = $10,
+       SET title = $1, description = $2, location = $3,
+           start_time = $4, end_time = $5, max_attendees = $6, hub_id = $7, is_fire_event = $8,
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $11
+       WHERE id = $9
        RETURNING *`,
-      [title, description, location, latitude, longitude, startTime, endTime, maxAttendees, hubId, isFireEvent, req.params.eventId]
+      [title, description, location, startTime, endTime, maxAttendees, hubId, isFireEvent, req.params.eventId]
     );
 
     res.json({ event: result.rows[0] });

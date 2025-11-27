@@ -161,11 +161,11 @@ export default function Events() {
       title: event.title,
       description: event.description || '',
       location: event.location,
-      latitude: event.latitude,
-      longitude: event.longitude,
+      latitude: null,
+      longitude: null,
       start_time: new Date(event.start_time).toISOString().slice(0, 16),
       end_time: new Date(event.end_time).toISOString().slice(0, 16),
-      max_participants: event.max_participants || ''
+      max_participants: event.max_attendees || ''
     });
     setShowCreateForm(true);
   };
@@ -177,8 +177,6 @@ export default function Events() {
         title: formData.title,
         description: formData.description,
         location: formData.location,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
         startTime: formData.start_time,
         endTime: formData.end_time,
         maxAttendees: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -423,7 +421,7 @@ export default function Events() {
                     <p className="text-gray-400 mb-4">{event.description}</p>
                   )}
                 </div>
-                {token && user && event.user_id === user.id && (
+                {token && user && event.created_by === user.userId && (
                   <button
                     onClick={() => handleEditEvent(event)}
                     className="btn-secondary flex items-center gap-2"
