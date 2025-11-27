@@ -47,7 +47,9 @@ export default function Hubs() {
     }
   };
 
-  const handleJoin = async (hubId) => {
+  const handleJoin = async (hubId, e) => {
+    e.preventDefault(); // Prevent link navigation
+    e.stopPropagation(); // Stop event bubbling
     try {
       await axios.post(`/api/hubs/${hubId}/join`, {}, {
         headers: { Authorization: `Bearer ${token}` }
@@ -55,7 +57,6 @@ export default function Hubs() {
       loadHubs();
     } catch (error) {
       console.error('Failed to join hub:', error);
-      alert('Failed to join hub');
     }
   };
 
@@ -177,7 +178,7 @@ export default function Hubs() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => handleJoin(hub.id)}
+                      onClick={(e) => handleJoin(hub.id, e)}
                       className="btn-secondary flex items-center gap-2"
                     >
                       <UserPlus size={16} />
