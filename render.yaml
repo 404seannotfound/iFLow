@@ -5,7 +5,7 @@ databases:
   - name: iflow-db
     databaseName: iflow
     user: iflow_user
-    plan: starter
+    plan: free
     region: oregon
 
 services:
@@ -14,7 +14,7 @@ services:
     name: iflow-web
     runtime: node
     region: oregon
-    plan: starter
+    plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
