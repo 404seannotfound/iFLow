@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Users, Clock, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, ArrowRight, Video, ShoppingBag, MessageCircle, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import { formatLocalDateTime } from '../utils/dateUtils';
@@ -10,6 +10,51 @@ export default function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [myHubs, setMyHubs] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const features = [
+    {
+      icon: Calendar,
+      title: 'Event Management',
+      description: 'Schedule events with conflict detection, RSVP tracking, and safety ratings.',
+      color: 'from-blue-500 to-cyan-500',
+      link: '/events'
+    },
+    {
+      icon: Video,
+      title: 'The Loop',
+      description: 'Vertical video feed for skill sharing with frame-by-frame analysis tools.',
+      color: 'from-purple-500 to-pink-500',
+      link: '/loop'
+    },
+    {
+      icon: MapPin,
+      title: 'Hub Communities',
+      description: 'Join local flow arts communities and stay connected with your scene.',
+      color: 'from-green-500 to-emerald-500',
+      link: '/hubs'
+    },
+    {
+      icon: ShoppingBag,
+      title: 'Marketplace',
+      description: 'Buy, sell, and trade props with fellow flow artists in your area.',
+      color: 'from-orange-500 to-red-500',
+      link: '/marketplace'
+    },
+    {
+      icon: MessageCircle,
+      title: 'Social Features',
+      description: 'Rich text posts, comments, emoji reactions, and direct messaging.',
+      color: 'from-pink-500 to-rose-500',
+      link: '/hubs'
+    },
+    {
+      icon: Sparkles,
+      title: 'Creator Support',
+      description: 'Support instructors through tips, subscriptions, and premium content.',
+      color: 'from-yellow-500 to-orange-500',
+      link: '/loop'
+    },
+  ];
 
   useEffect(() => {
     if (user) {
@@ -55,16 +100,51 @@ export default function Home() {
             The unified platform for the flow arts community. Replace Facebook, Instagram, and Patreon
             with one purpose-built ecosystem.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Link to="/register" className="btn-primary text-lg px-8 py-3">
-              Get Started
-            </Link>
-            <Link to="/loop" className="btn-outline text-lg px-8 py-3">
-              Explore The Loop
-            </Link>
-          </div>
+          {!user && (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+              <Link to="/register" className="btn-primary text-lg px-8 py-3">
+                Get Started
+              </Link>
+              <Link to="/loop" className="btn-outline text-lg px-8 py-3">
+                Explore The Loop
+              </Link>
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Features Grid - Only show when NOT logged in */}
+      {!user && (
+        <section>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Everything You Need in <span className="gradient-text">One Place</span>
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Built specifically for flow artists, instructors, and organizers
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Link 
+                  key={feature.title} 
+                  to={feature.link}
+                  className="card group hover:scale-105 hover:border-purple-500/50 transition-all"
+                >
+                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4`}>
+                    <Icon className="text-white" size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                  <p className="text-gray-400">{feature.description}</p>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* User Content Section - Only show when logged in */}
       {user && (
