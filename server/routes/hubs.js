@@ -10,7 +10,9 @@ router.get('/', optionalAuth, async (req, res) => {
     const result = await query(
       `SELECT h.id, h.name, h.description, h.location, h.avatar_url,
               h.member_count, h.created_at,
-              EXISTS(SELECT 1 FROM hub_members WHERE hub_id = h.id AND user_id = $1 AND is_active = true) as is_member
+              EXISTS(SELECT 1 FROM hub_members WHERE hub_id = h.id AND user_id = $1 AND is_active = true) as is_member,
+              (SELECT COUNT(*) FROM posts WHERE hub_id = h.id AND is_public = true) as post_count,
+              (SELECT content FROM posts WHERE hub_id = h.id AND is_public = true ORDER BY created_at DESC LIMIT 1) as recent_public_post
        FROM hubs h
        WHERE h.is_active = true
        ORDER BY h.member_count DESC

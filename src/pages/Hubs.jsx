@@ -193,12 +193,23 @@ export default function Hubs() {
                 <p className="text-gray-400 mb-4">{hub.description}</p>
               )}
 
-              <div className="flex items-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                 <div className="flex items-center gap-2">
                   <Users size={16} />
                   {hub.member_count || 0} members
                 </div>
+                <div className="flex items-center gap-2">
+                  <MessageCircle size={16} />
+                  {hub.post_count || 0} posts
+                </div>
               </div>
+
+              {hub.recent_public_post && (
+                <div className="mt-3 pt-3 border-t border-gray-800">
+                  <p className="text-xs text-gray-500 mb-1">Recent activity:</p>
+                  <p className="text-sm text-gray-400 line-clamp-2">{hub.recent_public_post}</p>
+                </div>
+              )}
             </Link>
           ))
         )}

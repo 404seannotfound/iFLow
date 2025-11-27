@@ -420,16 +420,20 @@ router.post('/test-data', async (req, res) => {
       );
     }
 
-    // Create posts in hubs (mix of public and private)
+    // Create posts in hubs (mostly public for discovery)
     const postContents = [
       { text: 'Just got my new LED poi! Can\'t wait to try them out tonight 🔥', public: true },
       { text: 'Anyone want to practice together this weekend?', public: true },
       { text: 'Check out this new trick I learned! [private session notes]', public: false },
-      { text: 'The sunset session yesterday was amazing! Thanks everyone who came', public: true },
+      { text: 'The sunset session yesterday was amazing! Thanks everyone who came 🌅', public: true },
       { text: 'Looking for recommendations on fire poi for beginners', public: true },
       { text: 'Private: Working on a new routine for the competition', public: false },
-      { text: 'Beach flow sessions are the best! Who else loves flowing by the ocean?', public: true },
-      { text: 'Just ordered some new props from FlowToys!', public: true }
+      { text: 'Beach flow sessions are the best! Who else loves flowing by the ocean? 🌊', public: true },
+      { text: 'Just ordered some new props from FlowToys!', public: true },
+      { text: 'New to the community! Excited to meet fellow flow artists 🎉', public: true },
+      { text: 'Weekly jam session was incredible! See you all next week', public: true },
+      { text: 'Does anyone have tips for learning contact poi?', public: true },
+      { text: 'Fire spinning under the stars last night was magical ✨', public: true }
     ];
 
     for (let i = 0; i < postContents.length; i++) {
@@ -438,6 +442,43 @@ router.post('/test-data', async (req, res) => {
         `INSERT INTO posts (user_id, hub_id, content, is_public)
          VALUES ($1, $2, $3, $4)`,
         [users[i % 4].id, hubId, postContents[i].text, postContents[i].public]
+      );
+    }
+
+    // Create some videos for The Loop
+    const videos = [
+      {
+        title: '3-Beat Weave Tutorial',
+        description: 'Learn the fundamentals of the 3-beat weave with poi',
+        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        thumbnailUrl: null
+      },
+      {
+        title: 'Sunset Beach Flow Session',
+        description: 'Flow session at the beach during golden hour',
+        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        thumbnailUrl: null
+      },
+      {
+        title: 'Fire Staff Basics',
+        description: 'Getting started with fire staff - safety and basic moves',
+        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        thumbnailUrl: null
+      }
+    ];
+
+    for (let i = 0; i < videos.length; i++) {
+      await query(
+        `INSERT INTO videos (user_id, hub_id, title, description, video_url, thumbnail_url)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          users[i % 4].id,
+          i % 2 === 0 ? sfHub.rows[0].id : canaryHub.rows[0].id,
+          videos[i].title,
+          videos[i].description,
+          videos[i].videoUrl,
+          videos[i].thumbnailUrl
+        ]
       );
     }
 
@@ -523,7 +564,9 @@ router.post('/test-data', async (req, res) => {
         hubs: 2,
         events: 5,
         posts: postContents.length,
-        listings: listings.length
+        videos: videos.length,
+        listings: listings.length,
+        publicPosts: postContents.filter(p => p.public).length
       }
     });
 
