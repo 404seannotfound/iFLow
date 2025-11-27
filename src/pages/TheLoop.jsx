@@ -21,9 +21,11 @@ export default function TheLoop() {
   const loadVideos = async () => {
     try {
       const response = await axios.get('/api/videos');
-      setVideos(response.data);
+      // API returns { videos: [...] }
+      setVideos(response.data.videos || response.data || []);
     } catch (error) {
       console.error('Failed to load videos:', error);
+      setVideos([]);
     } finally {
       setLoading(false);
     }
@@ -32,7 +34,13 @@ export default function TheLoop() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/videos', formData, {
+      // Convert to API format (camelCase)
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        videoUrl: formData.video_url
+      };
+      await axios.post('/api/videos', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowUploadForm(false);
@@ -40,7 +48,7 @@ export default function TheLoop() {
       loadVideos();
     } catch (error) {
       console.error('Failed to upload video:', error);
-      alert('Failed to upload video');
+      alert('Failed to upload video: ' + (error.response?.data?.error?.message || error.message));
     }
   };
 
