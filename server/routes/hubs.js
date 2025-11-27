@@ -111,6 +111,9 @@ router.post('/:hubId/join', authenticateToken, async (req, res) => {
 // Get hub posts
 router.get('/:hubId/posts', optionalAuth, async (req, res) => {
   try {
+    // If not authenticated, only show public posts
+    const publicFilter = req.user ? '' : 'AND p.is_public = true';
+    
     const result = await query(
       `SELECT p.*, u.username, u.display_name, u.avatar_url,
               (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as like_count,
@@ -118,7 +121,7 @@ router.get('/:hubId/posts', optionalAuth, async (req, res) => {
               EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $2) as user_has_liked
        FROM posts p
        JOIN users u ON p.user_id = u.id
-       WHERE p.hub_id = $1
+       WHERE p.hub_id = $1 ${publicFilter}
        ORDER BY p.is_pinned DESC, p.created_at DESC`,
       [req.params.hubId, req.user?.userId || null]
     );

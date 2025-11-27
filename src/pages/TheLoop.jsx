@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Video, Plus, Heart, Play, MessageCircle, Eye } from 'lucide-react';
+import { Video, Plus, Heart, Play, MessageCircle, Eye, Upload } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import Comments from '../components/Comments';

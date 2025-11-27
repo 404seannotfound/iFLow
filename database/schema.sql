@@ -236,6 +236,7 @@ CREATE TABLE posts (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     hub_id UUID REFERENCES hubs(id),
     content TEXT NOT NULL CHECK (LENGTH(content) <= 280),
+    is_public BOOLEAN DEFAULT true,
     is_pinned BOOLEAN DEFAULT false,
     pinned_at TIMESTAMP,
     pinned_by UUID REFERENCES users(id),
