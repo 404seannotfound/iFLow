@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { ShoppingBag, Plus, DollarSign, MapPin, Tag } from 'lucide-react';
+import { ShoppingBag, Plus, DollarSign, MapPin, Tag, MessageCircle } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import ImageUpload from '../components/ImageUpload';
+import Comments from '../components/Comments';
 
 export default function Marketplace() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedListing, setSelectedListing] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -212,9 +214,25 @@ export default function Marketplace() {
                 </div>
               </div>
 
-              <button className="btn-secondary w-full">
-                Contact Seller
-              </button>
+              <div className="space-y-2">
+                <button className="btn-secondary w-full">
+                  Contact Seller
+                </button>
+                
+                <button
+                  onClick={() => setSelectedListing(selectedListing === listing.id ? null : listing.id)}
+                  className="btn-secondary w-full flex items-center justify-center gap-2"
+                >
+                  <MessageCircle size={16} />
+                  {selectedListing === listing.id ? 'Hide Comments' : 'Show Comments'}
+                </button>
+
+                {selectedListing === listing.id && (
+                  <div className="pt-4 border-t border-gray-800">
+                    <Comments itemType="marketplace" itemId={listing.id} />
+                  </div>
+                )}
+              </div>
             </div>
           ))
         )}

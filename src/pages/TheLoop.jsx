@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Video, Heart, Eye, Plus, Upload } from 'lucide-react';
+import { Video, Plus, Heart, Play, MessageCircle } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
+import Comments from '../components/Comments';
 
 export default function TheLoop() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -175,22 +177,38 @@ export default function TheLoop() {
                 <p className="text-sm text-gray-400 mb-4 line-clamp-2">{video.description}</p>
               )}
 
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => token && handleLike(video.id)}
-                    className="flex items-center gap-1 hover:text-pink-500 transition-colors"
-                    disabled={!token}
-                  >
-                    <Heart size={16} className={video.user_has_liked ? 'fill-pink-500 text-pink-500' : ''} />
-                    {video.like_count || 0}
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <Eye size={16} />
-                    {video.view_count || 0}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => token && handleLike(video.id)}
+                      className="flex items-center gap-1 hover:text-pink-500 transition-colors"
+                      disabled={!token}
+                    >
+                      <Heart size={16} className={video.user_has_liked ? 'fill-pink-500 text-pink-500' : ''} />
+                      {video.like_count || 0}
+                    </button>
+                    <div className="flex items-center gap-1">
+                      <Eye size={16} />
+                      {video.view_count || 0}
+                    </div>
                   </div>
+                  <span className="text-xs">by {video.username}</span>
                 </div>
-                <span className="text-xs">by {video.username}</span>
+
+                <button
+                  onClick={() => setSelectedVideo(selectedVideo === video.id ? null : video.id)}
+                  className="btn-secondary w-full flex items-center justify-center gap-2 text-sm py-2"
+                >
+                  <MessageCircle size={14} />
+                  {selectedVideo === video.id ? 'Hide Comments' : 'Show Comments'}
+                </button>
+
+                {selectedVideo === video.id && (
+                  <div className="pt-4 border-t border-gray-800">
+                    <Comments itemType="videos" itemId={video.id} />
+                  </div>
+                )}
               </div>
             </div>
           ))

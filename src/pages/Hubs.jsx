@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MapPin, Plus, Users, UserPlus, Check } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';

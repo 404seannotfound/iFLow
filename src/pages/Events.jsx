@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, MapPin, Clock, Users, Map } from 'lucide-react';
+import { Calendar, Plus, MapPin, Clock, Users, Map, MessageCircle } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import MapPicker from '../components/MapPicker';
 import MiniMap from '../components/MiniMap';
+import Comments from '../components/Comments';
+import { formatLocalDateTime } from '../utils/dateUtils';
 
 export default function Events() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -283,25 +286,41 @@ export default function Events() {
               )}
 
               {token && (
-                <div className="flex gap-2">
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleRSVP(event.id, 'going')}
+                      className="btn-primary flex-1"
+                    >
+                      Going
+                    </button>
+                    <button
+                      onClick={() => handleRSVP(event.id, 'interested')}
+                      className="btn-secondary flex-1"
+                    >
+                      Interested
+                    </button>
+                    <button
+                      onClick={() => handleRSVP(event.id, 'not_going')}
+                      className="btn-secondary flex-1"
+                    >
+                      Can't Go
+                    </button>
+                  </div>
+                  
                   <button
-                    onClick={() => handleRSVP(event.id, 'going')}
-                    className="btn-primary flex-1"
+                    onClick={() => setSelectedEvent(selectedEvent === event.id ? null : event.id)}
+                    className="btn-secondary w-full flex items-center justify-center gap-2"
                   >
-                    Going
+                    <MessageCircle size={16} />
+                    {selectedEvent === event.id ? 'Hide Comments' : 'Show Comments'}
                   </button>
-                  <button
-                    onClick={() => handleRSVP(event.id, 'interested')}
-                    className="btn-secondary flex-1"
-                  >
-                    Interested
-                  </button>
-                  <button
-                    onClick={() => handleRSVP(event.id, 'not_going')}
-                    className="btn-secondary flex-1"
-                  >
-                    Can't Go
-                  </button>
+
+                  {selectedEvent === event.id && (
+                    <div className="pt-4 border-t border-gray-800">
+                      <Comments itemType="events" itemId={event.id} />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
