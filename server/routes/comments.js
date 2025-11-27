@@ -92,4 +92,43 @@ router.post('/comments/:commentId/like', authenticateToken, async (req, res) => 
   }
 });
 
+// Delete comment (and all children due to CASCADE)
+router.delete('/comments/:commentId', authenticateToken, async (req, res) => {
+  const { commentId } = req.params;
+
+  try {
+    // First check if user owns the comment
+    // Try all comment tables since we don't know which one it's in
+    const tables = ['event_comments', 'post_comments', 'video_comments', 'listing_comments'];
+    let deleted = false;
+
+    for (const table of tables) {
+      const checkResult = await query(
+        `SELECT user_id FROM ${table} WHERE id = $1`,
+        [commentId]
+      );
+
+      if (checkResult.rows.length > 0) {
+        if (checkResult.rows[0].user_id !== req.user.userId) {
+          return res.status(403).json({ error: { message: 'You can only delete your own comments' } });
+        }
+
+        // Delete the comment (CASCADE will delete children and likes)
+        await query(`DELETE FROM ${table} WHERE id = $1`, [commentId]);
+        deleted = true;
+        break;
+      }
+    }
+
+    if (!deleted) {
+      return res.status(404).json({ error: { message: 'Comment not found' } });
+    }
+
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.error('Delete comment error:', error);
+    res.status(500).json({ error: { message: 'Failed to delete comment' } });
+  }
+});
+
 export default router;

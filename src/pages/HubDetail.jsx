@@ -236,47 +236,55 @@ export default function HubDetail() {
               />
 
               {/* Post Actions */}
-              <div className="flex items-center gap-6 pt-4 border-t border-gray-800">
-                <div className="relative">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleLikePost(post.id)}
-                      className="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition-colors"
-                      disabled={!token}
-                    >
-                      <Heart 
-                        size={20} 
-                        className={post.user_has_liked ? 'fill-pink-500 text-pink-500' : ''} 
-                      />
-                      <span>{post.like_count || 0}</span>
-                    </button>
+              <div className="pt-4 border-t border-gray-800">
+                {/* Emoji Reactions */}
+                {post.reactions && post.reactions.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {post.reactions.map((reaction, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => token && handleLikePost(post.id, reaction.emoji)}
+                        className="flex items-center gap-1 px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-full text-sm transition-colors"
+                        disabled={!token}
+                      >
+                        <span className="text-lg">{reaction.emoji}</span>
+                        <span className="text-gray-400">{reaction.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Action Buttons */}
+                <div className="flex items-center gap-4">
+                  <div className="relative">
                     {token && (
                       <button
                         onClick={() => setShowEmojiPicker(showEmojiPicker === post.id ? null : post.id)}
-                        className="text-gray-400 hover:text-yellow-500 transition-colors"
+                        className="flex items-center gap-2 text-gray-400 hover:text-yellow-500 transition-colors"
                       >
                         <Smile size={18} />
+                        <span className="text-sm">React</span>
                       </button>
                     )}
+                    {showEmojiPicker === post.id && (
+                      <div className="absolute bottom-full left-0 mb-2 z-50">
+                        <EmojiPicker
+                          onEmojiClick={(emojiData) => handleLikePost(post.id, emojiData.emoji)}
+                          theme="dark"
+                          width={300}
+                          height={400}
+                        />
+                      </div>
+                    )}
                   </div>
-                  {showEmojiPicker === post.id && (
-                    <div className="absolute bottom-full left-0 mb-2 z-50">
-                      <EmojiPicker
-                        onEmojiClick={(emojiData) => handleLikePost(post.id, emojiData.emoji)}
-                        theme="dark"
-                        width={300}
-                        height={400}
-                      />
-                    </div>
-                  )}
+                  <button
+                    onClick={() => setSelectedPost(selectedPost === post.id ? null : post.id)}
+                    className="flex items-center gap-2 text-gray-400 hover:text-purple-500 transition-colors"
+                  >
+                    <MessageCircle size={18} />
+                    <span className="text-sm">{post.comment_count || 0} Comments</span>
+                  </button>
                 </div>
-                <button
-                  onClick={() => setSelectedPost(selectedPost === post.id ? null : post.id)}
-                  className="flex items-center gap-2 text-gray-400 hover:text-purple-500 transition-colors"
-                >
-                  <MessageCircle size={20} />
-                  <span>{post.comment_count || 0}</span>
-                </button>
               </div>
 
               {/* Comments Section */}

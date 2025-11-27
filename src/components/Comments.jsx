@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, Heart, Send, Smile } from 'lucide-react';
+import { MessageCircle, Heart, Send, Smile, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import EmojiPicker from 'emoji-picker-react';
@@ -60,6 +60,20 @@ export default function Comments({ itemType, itemId }) {
   const handleEmojiClick = (emojiData) => {
     setNewComment(prev => prev + emojiData.emoji);
     setShowEmojiPicker(false);
+  };
+
+  const handleDelete = async (commentId) => {
+    if (!confirm('Delete this comment? This will also delete all replies.')) return;
+    
+    try {
+      await axios.delete(`/api/comments/${commentId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      loadComments();
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      alert('Failed to delete comment: ' + (error.response?.data?.error?.message || error.message));
+    }
   };
 
   if (loading) {
@@ -148,6 +162,15 @@ export default function Comments({ itemType, itemId }) {
                       />
                       {comment.like_count || 0}
                     </button>
+                    {user && comment.user_id === user.id && (
+                      <button
+                        onClick={() => handleDelete(comment.id)}
+                        className="flex items-center gap-1 text-sm text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
