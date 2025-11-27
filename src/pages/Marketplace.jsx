@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { ShoppingBag, Plus, DollarSign, MapPin, Tag, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ShoppingBag, Plus, DollarSign, MapPin, Tag, MessageCircle, Send } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import ImageUpload from '../components/ImageUpload';
 import Comments from '../components/Comments';
 
 export default function Marketplace() {
+  const navigate = useNavigate();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -49,6 +51,28 @@ export default function Marketplace() {
     } catch (error) {
       console.error('Failed to create listing:', error);
       alert('Failed to create listing');
+    }
+  };
+
+  const handleContactSeller = async (sellerId, sellerUsername) => {
+    if (!token) {
+      alert('Please log in to message sellers');
+      return;
+    }
+    
+    try {
+      // Create or get existing conversation with seller
+      const response = await axios.post('/api/messages/conversations', 
+        { participantIds: [sellerId] },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Navigate to messages page (you'll need to create this)
+      alert(`Message feature coming soon! You would message ${sellerUsername}`);
+      // navigate(`/messages/${response.data.conversation.id}`);
+    } catch (error) {
+      console.error('Failed to start conversation:', error);
+      alert('Failed to start conversation');
     }
   };
 
@@ -215,8 +239,13 @@ export default function Marketplace() {
               </div>
 
               <div className="space-y-2">
-                <button className="btn-secondary w-full">
-                  Contact Seller
+                <button 
+                  onClick={() => handleContactSeller(listing.user_id, listing.seller_username)}
+                  className="btn-primary w-full flex items-center justify-center gap-2"
+                  disabled={!token || listing.user_id === user?.userId}
+                >
+                  <Send size={16} />
+                  {listing.user_id === user?.userId ? 'Your Listing' : 'Message Seller'}
                 </button>
                 
                 <button

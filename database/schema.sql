@@ -250,8 +250,9 @@ CREATE TABLE post_likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    emoji VARCHAR(10) DEFAULT '❤️',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(post_id, user_id)
+    UNIQUE(post_id, user_id, emoji)
 );
 
 -- ============================================================================

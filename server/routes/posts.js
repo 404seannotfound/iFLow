@@ -58,20 +58,22 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Like post
+// Like/React to post
 router.post('/:postId/like', authenticateToken, async (req, res) => {
   try {
+    const { emoji = '❤️' } = req.body;
+    
     await query(
-      `INSERT INTO post_likes (post_id, user_id)
-       VALUES ($1, $2)
-       ON CONFLICT (post_id, user_id) DO NOTHING`,
-      [req.params.postId, req.user.userId]
+      `INSERT INTO post_likes (post_id, user_id, emoji)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (post_id, user_id, emoji) DO NOTHING`,
+      [req.params.postId, req.user.userId, emoji]
     );
 
-    res.json({ message: 'Post liked' });
+    res.json({ message: 'Reaction added' });
   } catch (error) {
     console.error('Like post error:', error);
-    res.status(500).json({ error: { message: 'Failed to like post' } });
+    res.status(500).json({ error: { message: 'Failed to add reaction' } });
   }
 });
 

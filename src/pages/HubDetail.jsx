@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Users, ArrowLeft, Plus, Heart, MessageCircle, Image as ImageIcon } from 'lucide-react';
+import { MapPin, Users, ArrowLeft, Plus, Heart, MessageCircle, Image as ImageIcon, Smile } from 'lucide-react';
 import axios from 'axios';
+import EmojiPicker from 'emoji-picker-react';
 import { useAuthStore } from '../stores/authStore';
 import RichTextEditor from '../components/RichTextEditor';
 import Comments from '../components/Comments';
@@ -15,6 +16,7 @@ export default function HubDetail() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [postContent, setPostContent] = useState('');
   const [selectedPost, setSelectedPost] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(null);
   const { token, user } = useAuthStore();
 
   useEffect(() => {
@@ -63,12 +65,13 @@ export default function HubDetail() {
     }
   };
 
-  const handleLikePost = async (postId) => {
+  const handleLikePost = async (postId, emoji = '❤️') => {
     if (!token) return;
     try {
-      await axios.post(`/api/posts/${postId}/like`, {}, {
+      await axios.post(`/api/posts/${postId}/like`, { emoji }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      setShowEmojiPicker(null);
       loadPosts();
     } catch (error) {
       console.error('Failed to like post:', error);
@@ -234,17 +237,39 @@ export default function HubDetail() {
 
               {/* Post Actions */}
               <div className="flex items-center gap-6 pt-4 border-t border-gray-800">
-                <button
-                  onClick={() => handleLikePost(post.id)}
-                  className="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition-colors"
-                  disabled={!token}
-                >
-                  <Heart 
-                    size={20} 
-                    className={post.user_has_liked ? 'fill-pink-500 text-pink-500' : ''} 
-                  />
-                  <span>{post.like_count || 0}</span>
-                </button>
+                <div className="relative">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleLikePost(post.id)}
+                      className="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition-colors"
+                      disabled={!token}
+                    >
+                      <Heart 
+                        size={20} 
+                        className={post.user_has_liked ? 'fill-pink-500 text-pink-500' : ''} 
+                      />
+                      <span>{post.like_count || 0}</span>
+                    </button>
+                    {token && (
+                      <button
+                        onClick={() => setShowEmojiPicker(showEmojiPicker === post.id ? null : post.id)}
+                        className="text-gray-400 hover:text-yellow-500 transition-colors"
+                      >
+                        <Smile size={18} />
+                      </button>
+                    )}
+                  </div>
+                  {showEmojiPicker === post.id && (
+                    <div className="absolute bottom-full left-0 mb-2 z-50">
+                      <EmojiPicker
+                        onEmojiClick={(emojiData) => handleLikePost(post.id, emojiData.emoji)}
+                        theme="dark"
+                        width={300}
+                        height={400}
+                      />
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={() => setSelectedPost(selectedPost === post.id ? null : post.id)}
                   className="flex items-center gap-2 text-gray-400 hover:text-purple-500 transition-colors"
