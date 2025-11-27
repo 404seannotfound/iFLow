@@ -1,17 +1,25 @@
 import { useState, useEffect } from 'react';
-import { User, Edit2, Save, X } from 'lucide-react';
+import { User, Edit2, Save, X, Key, Upload } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
+import ImageUpload from '../components/ImageUpload';
 
 export default function Profile() {
   const { user, token } = useAuthStore();
   const [profile, setProfile] = useState(null);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [formData, setFormData] = useState({
     display_name: '',
     bio: '',
-    location: ''
+    location: '',
+    avatar_url: null
+  });
+  const [passwordData, setPasswordData] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
   });
 
   useEffect(() => {
@@ -31,7 +39,8 @@ export default function Profile() {
       setFormData({
         display_name: userData.display_name || '',
         bio: userData.bio || '',
-        location: userData.location || ''
+        location: userData.location || '',
+        avatar_url: userData.avatar_url || null
       });
     } catch (error) {
       console.error('Failed to load profile:', error);
@@ -50,6 +59,32 @@ export default function Profile() {
     } catch (error) {
       console.error('Failed to update profile:', error);
       alert('Failed to update profile');
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      alert('New passwords do not match');
+      return;
+    }
+    if (passwordData.new_password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    try {
+      await axios.put(`/api/users/${user.id}/password`, {
+        currentPassword: passwordData.current_password,
+        newPassword: passwordData.new_password
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setShowPasswordChange(false);
+      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
+      alert('Password changed successfully');
+    } catch (error) {
+      console.error('Failed to change password:', error);
+      alert(error.response?.data?.error?.message || 'Failed to change password');
     }
   };
 
@@ -76,9 +111,17 @@ export default function Profile() {
       <div className="card">
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-flow-purple to-flow-pink rounded-full flex items-center justify-center">
-              <User className="text-white" size={40} />
-            </div>
+            {profile.avatar_url || formData.avatar_url ? (
+              <img 
+                src={formData.avatar_url || profile.avatar_url} 
+                alt={profile.username}
+                className="w-20 h-20 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-20 h-20 bg-gradient-to-br from-flow-purple to-flow-pink rounded-full flex items-center justify-center">
+                <User className="text-white" size={40} />
+              </div>
+            )}
             <div>
               <h1 className="text-3xl font-bold">{profile.display_name || profile.username}</h1>
               <p className="text-gray-400">@{profile.username}</p>
@@ -165,6 +208,16 @@ export default function Profile() {
             )}
           </div>
 
+          {editing && (
+            <div>
+              <ImageUpload
+                onImageSelect={(avatar_url) => setFormData({ ...formData, avatar_url })}
+                currentImage={formData.avatar_url}
+                label="Profile Picture"
+              />
+            </div>
+          )}
+
           <div className="pt-6 border-t border-gray-700">
             <h3 className="text-lg font-semibold mb-4">Account Info</h3>
             <div className="space-y-2 text-sm">
@@ -179,6 +232,75 @@ export default function Profile() {
                 </span>
               </div>
             </div>
+          </div>
+
+          <div className="pt-6 border-t border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Change Password</h3>
+              {!showPasswordChange && (
+                <button
+                  onClick={() => setShowPasswordChange(true)}
+                  className="btn-secondary flex items-center gap-2"
+                >
+                  <Key size={16} />
+                  Change Password
+                </button>
+              )}
+            </div>
+
+            {showPasswordChange && (
+              <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Current Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordData.current_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                    className="input-field"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">New Password</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={passwordData.new_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
+                    className="input-field"
+                    placeholder="Enter new password (min 6 characters)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Confirm New Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordData.confirm_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
+                    className="input-field"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" className="btn-primary flex-1">
+                    Update Password
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordChange(false);
+                      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
+                    }}
+                    className="btn-secondary flex-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </div>
