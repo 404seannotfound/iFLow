@@ -370,6 +370,9 @@
         <button id="initBtn" class="btn-primary" onclick="initDatabase()">
           🚀 Initialize Database
         </button>
+        <button id="testDataBtn" class="btn-secondary" onclick="createTestData()">
+          🎭 Create Test Data
+        </button>
         <button id="refreshBtn" class="btn-secondary" onclick="loadStats()">
           🔄 Refresh Stats
         </button>
@@ -636,6 +639,34 @@
         errorEl.style.display = 'block';
         errorEl.textContent = error.message;
         initBtn.disabled = false;
+      }
+    }
+
+    async function createTestData() {
+      const testDataBtn = document.getElementById('testDataBtn');
+      const statusEl = document.getElementById('status');
+
+      testDataBtn.disabled = true;
+      statusEl.className = 'status loading';
+      statusEl.innerHTML = '<span class="spinner"></span> <span>Creating test data...</span>';
+
+      try {
+        const response = await fetch('/api/admin/test-data', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+          statusEl.className = 'status success';
+          statusEl.innerHTML = '✅ Test data created successfully!';
+          setTimeout(() => loadStats(), 1000);
+        } else {
+          throw new Error(data.error || 'Test data creation failed');
+        }
+
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.innerHTML = '❌ Test data creation failed: ' + error.message;
+      } finally {
+        testDataBtn.disabled = false;
       }
     }
 

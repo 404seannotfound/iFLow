@@ -270,4 +270,270 @@ router.post('/reset', async (req, res) => {
   }
 });
 
+// Create test data
+router.post('/test-data', async (req, res) => {
+  try {
+    console.log('🎭 Creating test data...');
+
+    // Create 4 test users
+    const users = [];
+    const usernames = ['alice', 'bob', 'charlie', 'diana'];
+    const displayNames = ['Alice Flow', 'Bob Spinner', 'Charlie Poi', 'Diana Hoop'];
+    
+    for (let i = 0; i < 4; i++) {
+      const hashedPassword = await bcrypt.hash('password123', 10);
+      const result = await query(
+        `INSERT INTO users (username, email, password_hash, display_name, bio)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, username`,
+        [
+          usernames[i],
+          `${usernames[i]}@example.com`,
+          hashedPassword,
+          displayNames[i],
+          `Flow artist and ${['poi', 'staff', 'hoop', 'fan'][i]} enthusiast`
+        ]
+      );
+      users.push(result.rows[0]);
+    }
+
+    // Create 2 hubs
+    const sfHub = await query(
+      `INSERT INTO hubs (name, description, location, latitude, longitude, creator_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id`,
+      [
+        'San Francisco Flow Arts',
+        'Bay Area flow artists community - poi, staff, hoop, and more!',
+        'San Francisco, CA',
+        37.7749,
+        -122.4194,
+        users[0].id
+      ]
+    );
+
+    const canaryHub = await query(
+      `INSERT INTO hubs (name, description, location, latitude, longitude, creator_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id`,
+      [
+        'Canary Islands Flow Community',
+        'Island paradise flow arts - beach sessions and fire spinning!',
+        'Tenerife, Canary Islands',
+        28.2916,
+        -16.6291,
+        users[1].id
+      ]
+    );
+
+    // Add members to hubs
+    for (const user of users) {
+      await query(
+        `INSERT INTO hub_members (hub_id, user_id, role)
+         VALUES ($1, $2, $3)`,
+        [sfHub.rows[0].id, user.id, 'member']
+      );
+      await query(
+        `INSERT INTO hub_members (hub_id, user_id, role)
+         VALUES ($1, $2, $3)`,
+        [canaryHub.rows[0].id, user.id, 'member']
+      );
+    }
+
+    // Create events
+    const now = new Date();
+    const tonight = new Date(now);
+    tonight.setHours(18, 0, 0, 0); // 6 PM tonight
+    
+    // Thanksgiving dinner in Leavenworth, WA (tonight 6-8:30 PM PST)
+    await query(
+      `INSERT INTO events (user_id, hub_id, title, description, location, latitude, longitude, start_time, end_time, max_participants, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        users[0].id,
+        sfHub.rows[0].id,
+        'Thanksgiving Flow Dinner',
+        'Join us for a potluck Thanksgiving dinner followed by evening flow session!',
+        'Leavenworth, WA',
+        47.5962,
+        -120.6615,
+        tonight.toISOString(),
+        new Date(tonight.getTime() + 2.5 * 60 * 60 * 1000).toISOString(), // 8:30 PM
+        30,
+        'scheduled'
+      ]
+    );
+
+    // SF event tomorrow
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(19, 0, 0, 0);
+    await query(
+      `INSERT INTO events (user_id, hub_id, title, description, location, latitude, longitude, start_time, end_time, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        users[1].id,
+        sfHub.rows[0].id,
+        'Golden Gate Park Flow Jam',
+        'Weekly flow jam at the polo fields. Bring your props and good vibes!',
+        'Golden Gate Park, San Francisco',
+        37.7694,
+        -122.4862,
+        tomorrow.toISOString(),
+        new Date(tomorrow.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        'scheduled'
+      ]
+    );
+
+    // Canary Islands events over next 4 days
+    for (let i = 0; i < 3; i++) {
+      const eventDate = new Date(now);
+      eventDate.setDate(eventDate.getDate() + i + 1);
+      eventDate.setHours(20, 0, 0, 0); // 8 PM local time
+      
+      const titles = [
+        'Beach Sunset Flow Session',
+        'Fire Spinning Workshop',
+        'Full Moon Flow Gathering'
+      ];
+      const descriptions = [
+        'Meet at Playa de las Teresitas for sunset flow and beach vibes',
+        'Learn fire safety and basic fire poi techniques. Bring your own props!',
+        'Celebrate the full moon with flow, music, and community'
+      ];
+      
+      await query(
+        `INSERT INTO events (user_id, hub_id, title, description, location, latitude, longitude, start_time, end_time, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [
+          users[i % 4].id,
+          canaryHub.rows[0].id,
+          titles[i],
+          descriptions[i],
+          'Tenerife, Canary Islands',
+          28.2916 + (Math.random() - 0.5) * 0.1,
+          -16.6291 + (Math.random() - 0.5) * 0.1,
+          eventDate.toISOString(),
+          new Date(eventDate.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+          'scheduled'
+        ]
+      );
+    }
+
+    // Create posts in hubs (mix of public and private)
+    const postContents = [
+      { text: 'Just got my new LED poi! Can\'t wait to try them out tonight 🔥', public: true },
+      { text: 'Anyone want to practice together this weekend?', public: true },
+      { text: 'Check out this new trick I learned! [private session notes]', public: false },
+      { text: 'The sunset session yesterday was amazing! Thanks everyone who came', public: true },
+      { text: 'Looking for recommendations on fire poi for beginners', public: true },
+      { text: 'Private: Working on a new routine for the competition', public: false },
+      { text: 'Beach flow sessions are the best! Who else loves flowing by the ocean?', public: true },
+      { text: 'Just ordered some new props from FlowToys!', public: true }
+    ];
+
+    for (let i = 0; i < postContents.length; i++) {
+      const hubId = i % 2 === 0 ? sfHub.rows[0].id : canaryHub.rows[0].id;
+      await query(
+        `INSERT INTO posts (user_id, hub_id, content, is_public)
+         VALUES ($1, $2, $3, $4)`,
+        [users[i % 4].id, hubId, postContents[i].text, postContents[i].public]
+      );
+    }
+
+    // Create marketplace listings
+    const listings = [
+      {
+        title: 'LED Contact Poi - Like New',
+        description: 'Barely used LED contact poi, perfect condition. Includes charger and carrying case.',
+        price: 120.00,
+        condition: 'like_new',
+        location: 'San Francisco, CA'
+      },
+      {
+        title: 'Fire Staff - 5ft',
+        description: 'Professional fire staff, 5 feet long. Great for beginners and intermediate spinners.',
+        price: 75.00,
+        condition: 'good',
+        location: 'Tenerife, Canary Islands'
+      },
+      {
+        title: 'Hula Hoop Set (3 hoops)',
+        description: 'Set of 3 polypro hoops in different sizes. Perfect for practicing or teaching.',
+        price: 45.00,
+        condition: 'good',
+        location: 'San Francisco, CA'
+      },
+      {
+        title: 'Sock Poi - Handmade',
+        description: 'Hand-sewn sock poi, great for practice. Set of 2.',
+        price: 15.00,
+        condition: 'new',
+        location: 'Tenerife, Canary Islands'
+      }
+    ];
+
+    const listingIds = [];
+    for (let i = 0; i < listings.length; i++) {
+      const result = await query(
+        `INSERT INTO marketplace_listings (user_id, hub_id, title, description, price, condition, location, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING id`,
+        [
+          users[i % 4].id,
+          i % 2 === 0 ? sfHub.rows[0].id : canaryHub.rows[0].id,
+          listings[i].title,
+          listings[i].description,
+          listings[i].price,
+          listings[i].condition,
+          listings[i].location,
+          'active'
+        ]
+      );
+      listingIds.push(result.rows[0].id);
+    }
+
+    // Add comments to marketplace listings
+    const comments = [
+      'Is this still available?',
+      'Would you ship to the mainland?',
+      'Great price! I\'m interested',
+      'Do you have any videos of these in action?',
+      'I\'ll take them! Can we meet this weekend?'
+    ];
+
+    for (let i = 0; i < listingIds.length; i++) {
+      // Add 1-2 comments per listing
+      const numComments = Math.floor(Math.random() * 2) + 1;
+      for (let j = 0; j < numComments; j++) {
+        await query(
+          `INSERT INTO listing_comments (listing_id, user_id, content)
+           VALUES ($1, $2, $3)`,
+          [listingIds[i], users[(i + j + 1) % 4].id, comments[(i + j) % comments.length]]
+        );
+      }
+    }
+
+    console.log('✅ Test data created successfully!');
+    res.json({
+      success: true,
+      message: 'Test data created',
+      summary: {
+        users: users.length,
+        hubs: 2,
+        events: 5,
+        posts: postContents.length,
+        listings: listings.length
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Test data creation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 export default router;
