@@ -23,6 +23,7 @@ export default function Hubs() {
     try {
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
       const response = await axios.get('/api/hubs', config);
+      console.log('Hubs API response:', response.data);
       // API returns { hubs: [...] }
       setHubs(response.data.hubs || response.data || []);
     } catch (error) {
@@ -149,6 +150,11 @@ export default function Hubs() {
           <div className="col-span-2 card text-center py-12">
             <MapPin className="mx-auto mb-4 text-gray-600" size={48} />
             <p className="text-gray-400 mb-4">No hubs yet</p>
+            {!token && (
+              <p className="text-sm text-gray-500 mb-4">
+                Hubs will appear here once they're created. Check back soon or create an account to start one!
+              </p>
+            )}
             {token && (
               <button
                 onClick={() => setShowCreateForm(true)}
