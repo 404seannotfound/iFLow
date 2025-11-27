@@ -3,6 +3,7 @@ import { MessageCircle, Heart, Send, Smile } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import EmojiPicker from 'emoji-picker-react';
+import { formatRelativeTime } from '../utils/dateUtils';
 
 export default function Comments({ itemType, itemId }) {
   const [comments, setComments] = useState([]);
@@ -131,7 +132,7 @@ export default function Comments({ itemType, itemId }) {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-bold">{comment.username}</span>
                     <span className="text-xs text-gray-500">
-                      {new Date(comment.created_at).toLocaleDateString()}
+                      {formatRelativeTime(comment.created_at)}
                     </span>
                   </div>
                   <p className="text-gray-300 whitespace-pre-wrap">{comment.content}</p>

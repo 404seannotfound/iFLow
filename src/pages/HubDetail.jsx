@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import RichTextEditor from '../components/RichTextEditor';
 import Comments from '../components/Comments';
+import { formatRelativeTime } from '../utils/dateUtils';
 
 export default function HubDetail() {
   const { hubId } = useParams();
@@ -217,12 +218,7 @@ export default function HubDetail() {
                   <div className="flex items-center gap-2">
                     <span className="font-bold">{post.username}</span>
                     <span className="text-sm text-gray-500">
-                      {new Date(post.created_at).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit'
-                      })}
+                      {formatRelativeTime(post.created_at)}
                     </span>
                   </div>
                 </div>

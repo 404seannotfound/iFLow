@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Video, Calendar, MapPin, ShoppingBag, Sparkles, Users, DollarSign, Clock, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
+import { formatLocalDateTime } from '../utils/dateUtils';
 
 export default function Home() {
   const { user, token } = useAuthStore();
@@ -161,12 +162,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Clock size={14} />
-                      {new Date(event.start_time).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit'
-                      })}
+                      {formatLocalDateTime(event.start_time)}
                     </div>
                   </div>
                 ))}

@@ -9,11 +9,13 @@ router.get('/', optionalAuth, async (req, res) => {
   try {
     const result = await query(
       `SELECT h.id, h.name, h.description, h.location, h.avatar_url,
-              h.member_count, h.created_at
+              h.member_count, h.created_at,
+              EXISTS(SELECT 1 FROM hub_members WHERE hub_id = h.id AND user_id = $1 AND is_active = true) as is_member
        FROM hubs h
        WHERE h.is_active = true
        ORDER BY h.member_count DESC
-       LIMIT 50`
+       LIMIT 50`,
+      [req.user?.userId || null]
     );
 
     res.json({ hubs: result.rows });
@@ -24,10 +26,11 @@ router.get('/', optionalAuth, async (req, res) => {
 });
 
 // Get single hub
-router.get('/:hubId', async (req, res) => {
+router.get('/:hubId', optionalAuth, async (req, res) => {
   try {
     const result = await query(
       `SELECT h.*, 
+              EXISTS(SELECT 1 FROM hub_members WHERE hub_id = h.id AND user_id = $2 AND is_active = true) as is_member,
               json_agg(DISTINCT jsonb_build_object(
                 'userId', hm.user_id,
                 'role', hm.role,
@@ -40,7 +43,7 @@ router.get('/:hubId', async (req, res) => {
        LEFT JOIN users u ON hm.user_id = u.id
        WHERE h.id = $1 AND h.is_active = true
        GROUP BY h.id`,
-      [req.params.hubId]
+      [req.params.hubId, req.user?.userId || null]
     );
 
     if (result.rows.length === 0) {
