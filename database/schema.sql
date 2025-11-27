@@ -279,32 +279,51 @@ CREATE TABLE story_views (
 -- DISCUSSION THREADS & COMMENTS
 -- ============================================================================
 
-CREATE TABLE threads (
+-- Specific comment tables for each entity type
+CREATE TABLE post_comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    entity_type VARCHAR(50) NOT NULL, -- 'event', 'video', 'marketplace_listing'
-    entity_id UUID NOT NULL,
-    created_by UUID REFERENCES users(id),
-    title VARCHAR(255),
-    comment_count INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE comments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    thread_id UUID REFERENCES threads(id) ON DELETE CASCADE,
+    post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    parent_comment_id UUID REFERENCES comments(id),
     content TEXT NOT NULL,
-    like_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_deleted BOOLEAN DEFAULT false
 );
 
+CREATE TABLE event_comments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT false
+);
+
+CREATE TABLE video_comments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    video_id UUID REFERENCES videos(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT false
+);
+
+CREATE TABLE listing_comments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    listing_id UUID REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT false
+);
+
+-- Universal comment likes table
 CREATE TABLE comment_likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    comment_id UUID REFERENCES comments(id) ON DELETE CASCADE,
+    comment_id UUID NOT NULL, -- Can reference any comment table
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(comment_id, user_id)
