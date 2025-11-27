@@ -589,3 +589,34 @@ INSERT INTO prop_tags (name, category) VALUES
     ('Club Juggling', 'other'),
     ('Fire Eating', 'other'),
     ('Fire Breathing', 'other');
+
+-- ============================================================================
+-- CONTENT TEMPLATES (Customizable text blocks)
+-- ============================================================================
+
+CREATE TABLE content_templates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    key VARCHAR(100) UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    description TEXT,
+    category VARCHAR(50) DEFAULT 'general',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert default flow arts templates
+INSERT INTO content_templates (key, title, content, description, category) VALUES
+('site_name', 'Site Name', 'iFLow', 'The name of your community platform', 'branding'),
+('site_tagline', 'Site Tagline', 'Flow Arts Community Platform', 'Short description of your platform', 'branding'),
+('community_name', 'Community Name', 'flow arts', 'What your community does (e.g., flow arts, cooking, photography)', 'branding'),
+('welcome_message', 'Welcome Message', 'Welcome to the flow arts community! Connect with fellow flow artists, share your skills, and discover events near you.', 'Homepage welcome message', 'homepage'),
+('about_platform', 'About Platform', 'iFLow is a community platform for flow artists to connect, share, learn, and grow together. Whether you''re spinning poi, hooping, juggling, or exploring any flow art, this is your space.', 'About section text', 'homepage'),
+('events_description', 'Events Page Description', 'Schedule and discover flow arts events', 'Subtitle for events page', 'pages'),
+('hubs_description', 'Hubs Page Description', 'Join communities and connect with fellow flow artists', 'Subtitle for hubs page', 'pages'),
+('marketplace_description', 'Marketplace Description', 'Buy, sell, and trade flow props and equipment', 'Subtitle for marketplace page', 'pages'),
+('loop_description', 'The Loop Description', 'Share your flow videos and get inspired', 'Subtitle for video page', 'pages'),
+('create_event_prompt', 'Create Event Prompt', 'Create the first event', 'Button text for creating first event', 'prompts'),
+('no_events_message', 'No Events Message', 'No upcoming events yet', 'Message when no events exist', 'prompts'),
+('no_hubs_message', 'No Hubs Message', 'No hubs yet. Create one to get started!', 'Message when no hubs exist', 'prompts'),
+('login_prompt', 'Login Prompt', 'Please log in to access this feature', 'Generic login required message', 'prompts');

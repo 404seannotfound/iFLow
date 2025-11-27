@@ -18,6 +18,7 @@ import marketplaceRoutes from './routes/marketplace.js';
 import messageRoutes from './routes/messages.js';
 import adminRoutes from './routes/admin.js';
 import commentsRoutes from './routes/comments.js';
+import templatesRoutes from './routes/templates.js';
 
 dotenv.config();
 
@@ -65,6 +66,7 @@ app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api', commentsRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/templates', templatesRoutes);
 
 // Serve static public files (db-init.html, etc.) - MUST come before catch-all
 app.use(express.static(join(__dirname, '../public')));

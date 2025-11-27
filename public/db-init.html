@@ -390,6 +390,18 @@
       </div>
 
       <div id="errorDetails" class="error-details" style="display: none;"></div>
+
+      <!-- Content Templates Editor -->
+      <div id="templatesSection" class="card" style="display: none; margin-top: 30px;">
+        <h2>📝 Content Templates</h2>
+        <p style="color: #9ca3af; margin-bottom: 20px;">
+          Customize the text blocks used throughout your platform. Perfect for rebranding to other communities (e.g., cooking, photography, etc.)
+        </p>
+        <div id="templatesContainer"></div>
+        <button class="btn-primary" onclick="saveTemplates()" style="margin-top: 20px;">
+          💾 Save All Changes
+        </button>
+      </div>
     </div>
   </div>
 
@@ -702,8 +714,101 @@
       }
     }
 
-    // Load stats on page load
+    // Load content templates
+    async function loadTemplates() {
+      try {
+        const response = await fetch('/api/templates');
+        const data = await response.json();
+        
+        if (data.details) {
+          const templatesSection = document.getElementById('templatesSection');
+          const container = document.getElementById('templatesContainer');
+          
+          // Group by category
+          const grouped = {};
+          data.details.forEach(template => {
+            if (!grouped[template.category]) {
+              grouped[template.category] = [];
+            }
+            grouped[template.category].push(template);
+          });
+          
+          // Render templates by category
+          container.innerHTML = Object.entries(grouped).map(([category, templates]) => `
+            <div style="margin-bottom: 30px;">
+              <h3 style="color: #a78bfa; text-transform: capitalize; margin-bottom: 15px;">
+                ${category}
+              </h3>
+              ${templates.map(template => `
+                <div style="margin-bottom: 20px; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 8px;">
+                  <label style="display: block; font-weight: bold; margin-bottom: 5px;">
+                    ${template.title}
+                  </label>
+                  <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 10px;">
+                    ${template.description || ''}
+                  </p>
+                  ${template.content.length > 100 ? `
+                    <textarea 
+                      id="template_${template.key}" 
+                      rows="3"
+                      style="width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151; border-radius: 6px; color: white; font-family: inherit;"
+                    >${template.content}</textarea>
+                  ` : `
+                    <input 
+                      type="text" 
+                      id="template_${template.key}" 
+                      value="${template.content.replace(/"/g, '&quot;')}"
+                      style="width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151; border-radius: 6px; color: white;"
+                    />
+                  `}
+                </div>
+              `).join('')}
+            </div>
+          `).join('');
+          
+          templatesSection.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Failed to load templates:', error);
+      }
+    }
+
+    // Save all template changes
+    async function saveTemplates() {
+      try {
+        const response = await fetch('/api/templates');
+        const data = await response.json();
+        
+        const updates = data.details.map(template => ({
+          key: template.key,
+          content: document.getElementById(`template_${template.key}`).value
+        }));
+        
+        const saveResponse = await fetch('/api/templates/bulk-update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ updates })
+        });
+        
+        const result = await saveResponse.json();
+        
+        if (result.templates) {
+          alert(`✅ Successfully updated ${result.count} templates!`);
+        } else {
+          throw new Error('Failed to save templates');
+        }
+      } catch (error) {
+        alert('❌ Failed to save templates: ' + error.message);
+      }
+    }
+
+    // Load stats and templates on page load
     loadStats();
+    
+    // Load templates after a short delay to ensure DB is ready
+    setTimeout(() => {
+      loadTemplates();
+    }, 1000);
 
     // Auto-refresh every 10 seconds
     statsInterval = setInterval(loadStats, 10000);
