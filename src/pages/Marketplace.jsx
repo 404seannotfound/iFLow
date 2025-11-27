@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, DollarSign, MapPin, Tag } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
+import ImageUpload from '../components/ImageUpload';
 
 export default function Marketplace() {
   const [listings, setListings] = useState([]);
@@ -12,7 +13,8 @@ export default function Marketplace() {
     description: '',
     price: '',
     condition: 'new',
-    location: ''
+    location: '',
+    imageUrl: null
   });
   const { token } = useAuthStore();
 
@@ -40,7 +42,7 @@ export default function Marketplace() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowCreateForm(false);
-      setFormData({ title: '', description: '', price: '', condition: 'new', location: '' });
+      setFormData({ title: '', description: '', price: '', condition: 'new', location: '', imageUrl: null });
       loadListings();
     } catch (error) {
       console.error('Failed to create listing:', error);
@@ -144,18 +146,15 @@ export default function Marketplace() {
               />
             </div>
 
-            <div className="flex gap-4">
-              <button type="submit" className="btn-primary flex-1">
-                Create Listing
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowCreateForm(false)}
-                className="btn-secondary flex-1"
-              >
-                Cancel
-              </button>
-            </div>
+            <ImageUpload
+              onImageSelect={(imageUrl) => setFormData({ ...formData, imageUrl })}
+              currentImage={formData.imageUrl}
+              label="Product Image"
+            />
+
+            <button type="submit" className="btn-primary w-full">
+              Create Listing
+            </button>
           </form>
         </div>
       )}
@@ -177,6 +176,13 @@ export default function Marketplace() {
         ) : (
           listings.map((listing) => (
             <div key={listing.id} className="card hover:border-orange-500/50 transition-colors">
+              {listing.image_url && (
+                <img 
+                  src={listing.image_url} 
+                  alt={listing.title}
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+              )}
               <div className="mb-4">
                 <h3 className="text-xl font-bold mb-2">{listing.title}</h3>
                 {listing.description && (

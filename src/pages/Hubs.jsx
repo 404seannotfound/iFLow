@@ -20,7 +20,8 @@ export default function Hubs() {
 
   const loadHubs = async () => {
     try {
-      const response = await axios.get('/api/hubs');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const response = await axios.get('/api/hubs', config);
       // API returns { hubs: [...] }
       setHubs(response.data.hubs || response.data || []);
     } catch (error) {
