@@ -64,14 +64,19 @@ app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Serve static public files (db-init.html, etc.)
+// Serve static public files (db-init.html, etc.) - MUST come before catch-all
 app.use(express.static(join(__dirname, '../public')));
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(join(__dirname, '../dist')));
   
-  app.get('*', (req, res) => {
+  // Catch-all route for React Router - only for non-file requests
+  app.get('*', (req, res, next) => {
+    // Skip if it's a file request (has extension) or API request
+    if (req.path.includes('.') || req.path.startsWith('/api')) {
+      return next();
+    }
     res.sendFile(join(__dirname, '../dist/index.html'));
   });
 }
