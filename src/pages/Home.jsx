@@ -238,19 +238,21 @@ export default function Home() {
         </section>
       )}
 
-      {/* CTA Section */}
-      <section className="text-center py-12">
-        <div className="card max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Ready to Flow?</h2>
-          <p className="text-gray-400 mb-6">
-            Join iFlow today and connect with flow artists worldwide. Share your skills, find events,
-            and support the community.
-          </p>
-          <Link to="/register" className="btn-primary text-lg px-8 py-3 inline-block">
-            Create Your Account
-          </Link>
-        </div>
-      </section>
+      {/* CTA Section - Only show when NOT logged in */}
+      {!user && (
+        <section className="text-center py-12">
+          <div className="card max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4">Ready to Flow?</h2>
+            <p className="text-gray-400 mb-6">
+              Join iFlow today and connect with flow artists worldwide. Share your skills, find events,
+              and support the community.
+            </p>
+            <Link to="/register" className="btn-primary text-lg px-8 py-3 inline-block">
+              Create Your Account
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

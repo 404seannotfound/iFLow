@@ -13,6 +13,7 @@ export default function Events() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -27,7 +28,52 @@ export default function Events() {
 
   useEffect(() => {
     loadEvents();
+    getUserLocation();
   }, []);
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Location access denied or unavailable');
+        }
+      );
+    }
+  };
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return (R * c).toFixed(1);
+  };
+
+  const getTimeUntilEvent = (startTime) => {
+    const now = new Date();
+    const eventDate = new Date(startTime);
+    const diff = eventDate - now;
+    
+    if (diff < 0) return 'Event started';
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) return `in ${days}d ${hours}h`;
+    if (hours > 0) return `in ${hours}h ${minutes}m`;
+    return `in ${minutes}m`;
+  };
 
   const loadEvents = async () => {
     try {
@@ -268,10 +314,18 @@ export default function Events() {
                 <div className="flex items-center gap-2">
                   <MapPin size={16} />
                   {event.location}
+                  {userLocation && event.latitude && event.longitude && (
+                    <span className="text-xs text-gray-500">
+                      ({calculateDistance(userLocation.latitude, userLocation.longitude, event.latitude, event.longitude)} mi away)
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock size={16} />
-                  {new Date(event.start_time).toLocaleString()}
+                  {formatLocalDateTime(event.start_time)}
+                  <span className="text-purple-400 font-semibold">
+                    {getTimeUntilEvent(event.start_time)}
+                  </span>
                 </div>
                 {event.max_participants && (
                   <div className="flex items-center gap-2">
