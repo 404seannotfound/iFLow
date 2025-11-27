@@ -43,15 +43,24 @@
   }
 
   .input, .input-field {
-    @apply w-full px-4 py-3 bg-gray-950 border-2 border-gray-700 rounded-lg 
-           text-white placeholder-gray-400 font-medium
+    @apply w-full px-4 py-3 rounded-lg font-medium
            focus:outline-none focus:ring-2 focus:ring-flow-purple focus:border-flow-purple
            hover:border-gray-600
            transition-all duration-200;
+    background-color: #1a1a2e !important;
+    border: 2px solid #4a5568 !important;
+    color: #ffffff !important;
+  }
+
+  .input::placeholder, .input-field::placeholder {
+    color: #9ca3af !important;
+    opacity: 1 !important;
   }
 
   .input-field:focus, .input:focus {
-    @apply bg-gray-900 border-flow-purple shadow-lg shadow-flow-purple/20;
+    background-color: #0f172a !important;
+    border-color: #a855f7 !important;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2) !important;
   }
 
   textarea.input-field, textarea.input {
@@ -60,6 +69,16 @@
 
   select.input-field, select.input {
     @apply cursor-pointer;
+  }
+
+  /* Date/time inputs need special handling */
+  input[type="datetime-local"].input-field,
+  input[type="datetime-local"].input,
+  input[type="date"].input-field,
+  input[type="date"].input,
+  input[type="time"].input-field,
+  input[type="time"].input {
+    color-scheme: dark;
   }
 
   label {
