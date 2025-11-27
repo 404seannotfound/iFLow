@@ -114,9 +114,16 @@ export default function Events() {
 
   const loadEvents = async () => {
     try {
-      const response = await axios.get('/api/events');
+      const response = await axios.get('/api/events', token ? {
+        headers: { Authorization: `Bearer ${token}` }
+      } : {});
       // API returns { events: [...] }
-      setEvents(response.data.events || response.data || []);
+      const eventsList = response.data.events || response.data || [];
+      console.log('Loaded events with RSVP status:', eventsList.map(e => ({ 
+        title: e.title, 
+        user_rsvp_status: e.user_rsvp_status 
+      })));
+      setEvents(eventsList);
     } catch (error) {
       console.error('Failed to load events:', error);
       setEvents([]);
@@ -576,32 +583,32 @@ export default function Events() {
 
               {token && (
                 <div className="space-y-4">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => handleRSVP(event.id, 'going')}
-                      className={`flex-1 ${event.user_rsvp_status === 'going' ? 'btn-primary' : 'btn-secondary'}`}
+                      className={`flex-1 min-w-[120px] ${event.user_rsvp_status === 'going' ? 'btn-primary' : 'btn-secondary'}`}
                     >
                       {event.user_rsvp_status === 'going' ? '✓ ' : ''}Going
                     </button>
                     <button
                       onClick={() => handleRSVP(event.id, 'interested')}
-                      className={`flex-1 ${event.user_rsvp_status === 'interested' ? 'btn-primary' : 'btn-secondary'}`}
+                      className={`flex-1 min-w-[120px] ${event.user_rsvp_status === 'interested' ? 'btn-primary' : 'btn-secondary'}`}
                     >
                       {event.user_rsvp_status === 'interested' ? '✓ ' : ''}Interested
                     </button>
                     <button
                       onClick={() => handleRSVP(event.id, 'not_going')}
-                      className={`flex-1 ${event.user_rsvp_status === 'not_going' ? 'btn-primary' : 'btn-secondary'}`}
+                      className={`flex-1 min-w-[120px] ${event.user_rsvp_status === 'not_going' ? 'btn-primary' : 'btn-secondary'}`}
                     >
                       {event.user_rsvp_status === 'not_going' ? '✓ ' : ''}Can't Go
                     </button>
                     {event.user_rsvp_status && (
                       <button
                         onClick={() => handleClearRSVP(event.id)}
-                        className="btn-secondary px-3"
-                        title="Clear response"
+                        className="btn-secondary px-4"
+                        title="Clear your response"
                       >
-                        ✕
+                        ✕ Clear
                       </button>
                     )}
                   </div>
