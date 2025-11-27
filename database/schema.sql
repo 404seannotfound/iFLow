@@ -310,16 +310,6 @@ CREATE TABLE video_comments (
     is_deleted BOOLEAN DEFAULT false
 );
 
-CREATE TABLE listing_comments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    listing_id UUID REFERENCES marketplace_listings(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_deleted BOOLEAN DEFAULT false
-);
-
 -- Universal comment likes table
 CREATE TABLE comment_likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -390,6 +380,16 @@ CREATE TABLE marketplace_prop_tags (
     listing_id UUID REFERENCES marketplace_listings(id) ON DELETE CASCADE,
     prop_tag_id UUID REFERENCES prop_tags(id) ON DELETE CASCADE,
     UNIQUE(listing_id, prop_tag_id)
+);
+
+CREATE TABLE listing_comments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    listing_id UUID REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT false
 );
 
 -- ============================================================================
