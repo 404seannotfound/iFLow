@@ -363,7 +363,12 @@ export default function Events() {
 
             {/* Start Date & Time */}
             <div>
-              <label className="block text-sm font-medium mb-2">Start Date & Time</label>
+              <label className="block text-sm font-medium mb-2">
+                Start Date & Time 
+                <span className="text-xs text-gray-400 ml-2">
+                  ({Intl.DateTimeFormat().resolvedOptions().timeZone})
+                </span>
+              </label>
               <div className="grid grid-cols-3 gap-3">
                 <input
                   type="date"
@@ -398,7 +403,12 @@ export default function Events() {
 
             {/* End Date & Time */}
             <div>
-              <label className="block text-sm font-medium mb-2">End Date & Time</label>
+              <label className="block text-sm font-medium mb-2">
+                End Date & Time
+                <span className="text-xs text-gray-400 ml-2">
+                  ({Intl.DateTimeFormat().resolvedOptions().timeZone})
+                </span>
+              </label>
               <div className="grid grid-cols-3 gap-3">
                 <input
                   type="date"
@@ -530,7 +540,12 @@ export default function Events() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock size={16} />
-                  {formatLocalDateTime(event.start_time)}
+                  <div className="flex flex-col">
+                    <span>{formatLocalDateTime(event.start_time)}</span>
+                    <span className="text-xs text-gray-500">
+                      {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                    </span>
+                  </div>
                   <span className="text-purple-400 font-semibold">
                     {getTimeUntilEvent(event.start_time)}
                   </span>
