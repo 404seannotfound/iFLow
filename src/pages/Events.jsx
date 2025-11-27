@@ -182,6 +182,18 @@ export default function Events() {
     }
   };
 
+  const handleClearRSVP = async (eventId) => {
+    try {
+      await axios.delete(`/api/events/${eventId}/rsvp`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      loadEvents();
+    } catch (error) {
+      console.error('Failed to clear RSVP:', error);
+      alert('Failed to clear RSVP: ' + (error.response?.data?.error?.message || error.message));
+    }
+  };
+
   const handleEditEvent = (event) => {
     setEditingEvent(event.id);
     const startDT = extractDateTime(event.start_time);
@@ -567,37 +579,48 @@ export default function Events() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleRSVP(event.id, 'going')}
-                      className="btn-primary flex-1"
+                      className={`flex-1 ${event.user_rsvp_status === 'going' ? 'btn-primary' : 'btn-secondary'}`}
                     >
-                      Going
+                      {event.user_rsvp_status === 'going' ? '✓ ' : ''}Going
                     </button>
                     <button
                       onClick={() => handleRSVP(event.id, 'interested')}
-                      className="btn-secondary flex-1"
+                      className={`flex-1 ${event.user_rsvp_status === 'interested' ? 'btn-primary' : 'btn-secondary'}`}
                     >
-                      Interested
+                      {event.user_rsvp_status === 'interested' ? '✓ ' : ''}Interested
                     </button>
                     <button
                       onClick={() => handleRSVP(event.id, 'not_going')}
-                      className="btn-secondary flex-1"
+                      className={`flex-1 ${event.user_rsvp_status === 'not_going' ? 'btn-primary' : 'btn-secondary'}`}
                     >
-                      Can't Go
+                      {event.user_rsvp_status === 'not_going' ? '✓ ' : ''}Can't Go
                     </button>
+                    {event.user_rsvp_status && (
+                      <button
+                        onClick={() => handleClearRSVP(event.id)}
+                        className="btn-secondary px-3"
+                        title="Clear response"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
-                  
-                  <button
-                    onClick={() => setSelectedEvent(selectedEvent === event.id ? null : event.id)}
-                    className="btn-secondary w-full flex items-center justify-center gap-2"
-                  >
-                    <MessageCircle size={16} />
-                    {selectedEvent === event.id ? 'Hide Comments' : 'Show Comments'}
-                  </button>
-
-                  {selectedEvent === event.id && (
-                    <div className="pt-4 border-t border-gray-800">
-                      <Comments itemType="events" itemId={event.id} />
-                    </div>
+                  {!event.user_rsvp_status && event.created_by !== user?.id && (
+                    <p className="text-xs text-gray-500 text-center">
+                      No response yet - let others know if you're coming!
+                    </p>
                   )}
+                  {event.created_by === user?.id && (
+                    <p className="text-xs text-purple-400 text-center">
+                      You created this event
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {selectedEvent === event.id && (
+                <div className="pt-4 border-t border-gray-800">
+                  <Comments itemType="events" itemId={event.id} />
                 </div>
               )}
             </div>

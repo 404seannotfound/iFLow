@@ -17,7 +17,8 @@ router.get('/', optionalAuth, async (req, res) => {
                'username', u.username,
                'displayName', u.display_name
              )) FILTER (WHERE ei.id IS NOT NULL) as instructors,
-             (SELECT COUNT(*) FROM event_rsvps WHERE event_id = e.id AND status = 'going') as going_count
+             (SELECT COUNT(*) FROM event_rsvps WHERE event_id = e.id AND status = 'going') as going_count,
+             (SELECT status FROM event_rsvps WHERE event_id = e.id AND user_id = $1) as user_rsvp_status
       FROM events e
       LEFT JOIN hubs h ON e.hub_id = h.id
       LEFT JOIN event_instructors ei ON e.id = ei.event_id
@@ -25,8 +26,8 @@ router.get('/', optionalAuth, async (req, res) => {
       WHERE e.status = 'scheduled'
     `;
     
-    const params = [];
-    let paramCount = 1;
+    const params = [req.user?.userId || null];
+    let paramCount = 2;
 
     if (hubId) {
       queryText += ` AND e.hub_id = $${paramCount}`;
@@ -113,6 +114,21 @@ router.post('/:eventId/rsvp', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('RSVP error:', error);
     res.status(500).json({ error: { message: 'Failed to update RSVP' } });
+  }
+});
+
+// Clear RSVP (remove response)
+router.delete('/:eventId/rsvp', authenticateToken, async (req, res) => {
+  try {
+    await query(
+      `DELETE FROM event_rsvps WHERE event_id = $1 AND user_id = $2`,
+      [req.params.eventId, req.user.userId]
+    );
+
+    res.json({ message: 'RSVP cleared successfully' });
+  } catch (error) {
+    console.error('Clear RSVP error:', error);
+    res.status(500).json({ error: { message: 'Failed to clear RSVP' } });
   }
 });
 
