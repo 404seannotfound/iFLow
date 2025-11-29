@@ -75,9 +75,9 @@ export default function Hubs() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">
-            <span className="gradient-text">Hubs</span>
+            <span className="gradient-text">Neighborhoods</span>
           </h1>
-          <p className="text-gray-400">Connect with local flow arts communities</p>
+          <p className="text-gray-400">Connect with your neighbors and local community</p>
         </div>
         {token && (
           <button
@@ -85,24 +85,24 @@ export default function Hubs() {
             className="btn-primary flex items-center gap-2"
           >
             <Plus size={20} />
-            Create Hub
+            Create Neighborhood
           </button>
         )}
       </div>
 
       {showCreateForm && (
         <div className="card mb-8">
-          <h2 className="text-2xl font-bold mb-6">Create New Hub</h2>
+          <h2 className="text-2xl font-bold mb-6">Create New Neighborhood</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Hub Name</label>
+              <label className="block text-sm font-medium mb-2">Neighborhood Name</label>
               <input
                 type="text"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="input-field"
-                placeholder="San Francisco Flow Arts"
+                placeholder="Maple Street Block"
               />
             </div>
 
@@ -113,7 +113,7 @@ export default function Hubs() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="input-field"
                 rows="3"
-                placeholder="A community for flow artists in the SF Bay Area..."
+                placeholder="A friendly neighborhood community for residents of..."
               />
             </div>
 
@@ -131,7 +131,7 @@ export default function Hubs() {
 
             <div className="flex gap-4">
               <button type="submit" className="btn-primary flex-1">
-                Create Hub
+                Create Neighborhood
               </button>
               <button
                 type="button"
@@ -149,10 +149,10 @@ export default function Hubs() {
         {hubs.length === 0 ? (
           <div className="col-span-2 card text-center py-12">
             <MapPin className="mx-auto mb-4 text-gray-600" size={48} />
-            <p className="text-gray-400 mb-4">No hubs yet</p>
+            <p className="text-gray-400 mb-4">No neighborhoods yet</p>
             {!token && (
               <p className="text-sm text-gray-500 mb-4">
-                Hubs will appear here once they're created. Check back soon or create an account to start one!
+                Neighborhoods will appear here once they're created. Check back soon or create an account to start one!
               </p>
             )}
             {token && (
@@ -160,7 +160,7 @@ export default function Hubs() {
                 onClick={() => setShowCreateForm(true)}
                 className="btn-primary mx-auto"
               >
-                Create the first hub
+                Create the first neighborhood
               </button>
             )}
           </div>
@@ -202,7 +202,7 @@ export default function Hubs() {
               <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                 <div className="flex items-center gap-2">
                   <Users size={16} />
-                  {hub.member_count || 0} members
+                  {hub.member_count || 0} neighbors
                 </div>
                 <div className="flex items-center gap-2">
                   <MessageCircle size={16} />

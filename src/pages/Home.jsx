@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Users, Clock, ArrowRight, Video, ShoppingBag, MessageCircle, Sparkles } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, ArrowRight, Video, ShoppingBag, MessageCircle, Shield, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import { formatLocalDateTime } from '../utils/dateUtils';
@@ -14,43 +14,43 @@ export default function Home() {
   const features = [
     {
       icon: Calendar,
-      title: 'Event Management',
-      description: 'Schedule events with conflict detection, RSVP tracking, and safety ratings.',
+      title: 'Community Events',
+      description: 'Block parties, HOA meetings, holiday gatherings, and neighborhood watch meetups.',
       color: 'from-blue-500 to-cyan-500',
       link: '/events'
     },
     {
       icon: Video,
-      title: 'The Loop',
-      description: 'Vertical video feed for skill sharing with frame-by-frame analysis tools.',
+      title: 'The Feed',
+      description: 'Share updates, photos, and videos with your neighbors. Stay informed about what\'s happening.',
       color: 'from-purple-500 to-pink-500',
       link: '/loop'
     },
     {
       icon: MapPin,
-      title: 'Hub Communities',
-      description: 'Join local flow arts communities and stay connected with your scene.',
+      title: 'Neighborhoods',
+      description: 'Connect with your street, block, or subdivision. Build lasting community bonds.',
       color: 'from-green-500 to-emerald-500',
       link: '/hubs'
     },
     {
       icon: ShoppingBag,
       title: 'Marketplace',
-      description: 'Buy, sell, and trade props with fellow flow artists in your area.',
+      description: 'Buy, sell, and trade with neighbors. Garage sale items, tools to borrow, and more.',
       color: 'from-orange-500 to-red-500',
       link: '/marketplace'
     },
     {
-      icon: MessageCircle,
-      title: 'Social Features',
-      description: 'Rich text posts, comments, emoji reactions, and direct messaging.',
-      color: 'from-pink-500 to-rose-500',
+      icon: Shield,
+      title: 'Neighborhood Watch',
+      description: 'Report suspicious activity, share safety tips, and keep everyone informed.',
+      color: 'from-red-500 to-rose-500',
       link: '/hubs'
     },
     {
-      icon: Sparkles,
-      title: 'Creator Support',
-      description: 'Support instructors through tips, subscriptions, and premium content.',
+      icon: AlertTriangle,
+      title: 'Local Alerts',
+      description: 'Lost pets, road closures, weather warnings, and urgent community updates.',
       color: 'from-yellow-500 to-orange-500',
       link: '/loop'
     },
@@ -94,19 +94,19 @@ export default function Home() {
       <section className="text-center py-12">
         <div className="space-y-6">
           <h1 className="text-5xl md:text-7xl font-bold">
-            <span className="gradient-text">Welcome to iFlow</span>
+            <span className="gradient-text">Welcome to OurHome</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto">
-            The unified platform for the flow arts community. Replace Facebook, Instagram, and Patreon
-            with one purpose-built ecosystem.
+            Your neighborhood, connected. Stay informed about local events, share updates with neighbors,
+            and build a stronger community together.
           </p>
           {!user && (
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Link to="/register" className="btn-primary text-lg px-8 py-3">
-                Get Started
+                Join Your Neighborhood
               </Link>
               <Link to="/loop" className="btn-outline text-lg px-8 py-3">
-                Explore The Loop
+                See What\'s Happening
               </Link>
             </div>
           )}
@@ -121,7 +121,7 @@ export default function Home() {
               Everything You Need in <span className="gradient-text">One Place</span>
             </h2>
             <p className="text-gray-400 text-lg">
-              Built specifically for flow artists, instructors, and organizers
+              Built for neighbors who care about their community
             </p>
           </div>
 
@@ -197,7 +197,7 @@ export default function Home() {
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-3xl font-bold">
-                <span className="gradient-text">My Hubs</span>
+                <span className="gradient-text">My Neighborhoods</span>
               </h2>
               <Link to="/hubs" className="text-green-400 hover:text-green-300 flex items-center gap-2">
                 View All <ArrowRight size={18} />
@@ -218,7 +218,7 @@ export default function Home() {
                         <h3 className="font-bold text-lg truncate">{hub.name}</h3>
                         <p className="text-sm text-gray-400 truncate">{hub.location}</p>
                         <p className="text-xs text-gray-500 mt-1">
-                          {hub.member_count || 0} members
+                          {hub.member_count || 0} neighbors
                         </p>
                       </div>
                     </div>
@@ -228,9 +228,9 @@ export default function Home() {
             ) : (
               <div className="card text-center py-8">
                 <MapPin className="mx-auto mb-3 text-gray-600" size={40} />
-                <p className="text-gray-400 mb-4">You haven't joined any hubs yet</p>
+                <p className="text-gray-400 mb-4">You haven't joined any neighborhoods yet</p>
                 <Link to="/hubs" className="btn-primary inline-block">
-                  Explore Hubs
+                  Find Your Neighborhood
                 </Link>
               </div>
             )}
@@ -242,13 +242,13 @@ export default function Home() {
       {!user && (
         <section className="text-center py-12">
           <div className="card max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold mb-4">Ready to Flow?</h2>
+            <h2 className="text-3xl font-bold mb-4">Ready to Connect?</h2>
             <p className="text-gray-400 mb-6">
-              Join iFlow today and connect with flow artists worldwide. Share your skills, find events,
-              and support the community.
+              Join OurHome today and connect with your neighbors. Stay informed, share updates,
+              and help build a stronger community.
             </p>
             <Link to="/register" className="btn-primary text-lg px-8 py-3 inline-block">
-              Create Your Account
+              Join Your Neighborhood
             </Link>
           </div>
         </section>

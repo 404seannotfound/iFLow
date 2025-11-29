@@ -301,7 +301,7 @@ export default function Events() {
           <h1 className="text-4xl font-bold mb-2">
             <span className="gradient-text">Events</span>
           </h1>
-          <p className="text-gray-400">Schedule and discover flow arts events</p>
+          <p className="text-gray-400">Community gatherings, meetings, and neighborhood events</p>
         </div>
         {token && (
           <button
@@ -348,7 +348,7 @@ export default function Events() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="input-field"
-                placeholder="Weekly Flow Jam"
+                placeholder="Block Party on Oak Street"
               />
             </div>
 
@@ -357,7 +357,7 @@ export default function Events() {
               <RichTextEditor
                 value={formData.description}
                 onChange={(val) => setFormData({ ...formData, description: val })}
-                placeholder="Join us for a fun flow session... (paste screenshots here!)"
+                placeholder="Tell neighbors about the event... (paste screenshots!)"
                 compact={true}
               />
             </div>

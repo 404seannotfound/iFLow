@@ -10,9 +10,9 @@ export default function Layout() {
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'The Loop', href: '/loop', icon: Video },
+    { name: 'The Feed', href: '/loop', icon: Video },
     { name: 'Events', href: '/events', icon: Calendar },
-    { name: 'Hubs', href: '/hubs', icon: MapPin },
+    { name: 'Neighborhoods', href: '/hubs', icon: MapPin },
     { name: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
   ];
 
@@ -26,10 +26,10 @@ export default function Layout() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-flow-purple to-flow-pink rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">i</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xl">🏡</span>
               </div>
-              <span className="text-xl font-bold gradient-text">iFlow</span>
+              <span className="text-xl font-bold gradient-text">OurHome</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -170,9 +170,9 @@ export default function Layout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-500">
             <p className="mb-2">
-              <span className="gradient-text font-bold">iFlow</span> - Unifying the flow arts community
+              <span className="gradient-text font-bold">OurHome</span> - Connecting neighbors, building community
             </p>
-            <p className="text-sm">© 2024 iFlow. Built for flow artists, by flow artists.</p>
+            <p className="text-sm">© 2024 OurHome. By neighbors, for neighbors.</p>
           </div>
         </div>
       </footer>

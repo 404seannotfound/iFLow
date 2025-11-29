@@ -92,7 +92,7 @@ export default function Marketplace() {
           <h1 className="text-4xl font-bold mb-2">
             <span className="gradient-text">Marketplace</span>
           </h1>
-          <p className="text-gray-400">Buy, sell, and trade flow props</p>
+          <p className="text-gray-400">Buy, sell, and trade with your neighbors</p>
         </div>
         {token && (
           <button
@@ -117,7 +117,7 @@ export default function Marketplace() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="input-field"
-                placeholder="LED Poi - Contact Juggling Balls"
+                placeholder="Snow blower - barely used!"
               />
             </div>
 

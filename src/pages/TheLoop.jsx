@@ -106,9 +106,9 @@ export default function TheLoop() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">
-            <span className="gradient-text">The Loop</span>
+            <span className="gradient-text">The Feed</span>
           </h1>
-          <p className="text-gray-400">Vertical video feed for flow arts skill sharing</p>
+          <p className="text-gray-400">Neighborhood updates, photos, and videos from your community</p>
         </div>
         {token && (
           <button
@@ -133,7 +133,7 @@ export default function TheLoop() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="input-field"
-                placeholder="My awesome flow session"
+                placeholder="Holiday lights on Oak Street!"
               />
             </div>
 
@@ -142,7 +142,7 @@ export default function TheLoop() {
               <RichTextEditor
                 value={formData.description}
                 onChange={(val) => setFormData({ ...formData, description: val })}
-                placeholder="Describe your video... (paste screenshots here!)"
+                placeholder="Share what's happening in the neighborhood... (paste screenshots!)"
                 compact={true}
               />
             </div>

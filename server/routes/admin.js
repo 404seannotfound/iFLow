@@ -275,10 +275,10 @@ router.post('/test-data', async (req, res) => {
   try {
     console.log('🎭 Creating test data...');
 
-    // Create 4 test users
+    // Create 4 test users (neighbors)
     const users = [];
-    const usernames = ['alice', 'bob', 'charlie', 'diana'];
-    const displayNames = ['Alice Flow', 'Bob Spinner', 'Charlie Poi', 'Diana Hoop'];
+    const usernames = ['susan', 'mike', 'karen', 'dave'];
+    const displayNames = ['Susan Miller', 'Mike Johnson', 'Karen Thompson', 'Dave Wilson'];
     
     for (let i = 0; i < 4; i++) {
       const hashedPassword = await bcrypt.hash('password123', 10);
@@ -291,239 +291,252 @@ router.post('/test-data', async (req, res) => {
           `${usernames[i]}@example.com`,
           hashedPassword,
           displayNames[i],
-          `Flow artist and ${['poi', 'staff', 'hoop', 'fan'][i]} enthusiast`
+          `${['Retired teacher, 15 years on Oak Street', 'IT guy, neighborhood watch captain', 'Real estate agent, HOA board member', 'Contractor, been here since 2010'][i]}`
         ]
       );
       users.push(result.rows[0]);
     }
 
-    // Create 2 hubs
-    const sfHub = await query(
+    // Create 2 neighborhoods
+    const oakStreet = await query(
       `INSERT INTO hubs (name, description, location, latitude, longitude, created_by)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
       [
-        'San Francisco Flow Arts',
-        'Bay Area flow artists community - poi, staff, hoop, and more!',
-        'San Francisco, CA',
-        37.7749,
-        -122.4194,
+        'Oak Street Block',
+        'The friendliest block in Maplewood! Join us for community events, neighborhood watch updates, and good old-fashioned neighborly chat.',
+        'Oak Street, Maplewood',
+        40.7282,
+        -74.2351,
         users[0].id
       ]
     );
 
-    const canaryHub = await query(
+    const pineHills = await query(
       `INSERT INTO hubs (name, description, location, latitude, longitude, created_by)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
       [
-        'Canary Islands Flow Community',
-        'Island paradise flow arts - beach sessions and fire spinning!',
-        'Las Palmas, Gran Canaria',
-        28.1235,
-        -15.4363,
-        users[1].id
+        'Pine Hills Subdivision',
+        'Pine Hills HOA community board - stay updated on meetings, events, and community guidelines.',
+        'Pine Hills, Maplewood',
+        40.7312,
+        -74.2401,
+        users[2].id
       ]
     );
 
-    // Add members to hubs
+    // Add members to neighborhoods
     for (const user of users) {
       await query(
         `INSERT INTO hub_members (hub_id, user_id, role)
          VALUES ($1, $2, $3)`,
-        [sfHub.rows[0].id, user.id, 'member']
+        [oakStreet.rows[0].id, user.id, 'member']
       );
       await query(
         `INSERT INTO hub_members (hub_id, user_id, role)
          VALUES ($1, $2, $3)`,
-        [canaryHub.rows[0].id, user.id, 'member']
+        [pineHills.rows[0].id, user.id, 'member']
       );
     }
 
-    // Create events
+    // Create events - neighborhood themed with holiday season
     const now = new Date();
-    const tonight = new Date(now);
-    tonight.setHours(18, 0, 0, 0); // 6 PM tonight
     
-    // Thanksgiving dinner in Leavenworth, WA (tonight 6-8:30 PM PST)
+    // Black Friday Leftovers Potluck (tomorrow)
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(17, 0, 0, 0);
     await query(
       `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, max_attendees, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         users[0].id,
-        sfHub.rows[0].id,
-        'Thanksgiving Flow Dinner',
-        'Join us for a potluck Thanksgiving dinner followed by evening flow session!',
-        'Leavenworth, WA',
-        tonight.toISOString(),
-        new Date(tonight.getTime() + 2.5 * 60 * 60 * 1000).toISOString(), // 8:30 PM
-        30,
+        oakStreet.rows[0].id,
+        'Post-Thanksgiving Leftovers Potluck',
+        'Bring your Turkey Day leftovers! Let\'s share food and Black Friday horror stories. 🦃',
+        '123 Oak Street - Susan\'s house',
+        tomorrow.toISOString(),
+        new Date(tomorrow.getTime() + 3 * 60 * 60 * 1000).toISOString(),
+        25,
         'scheduled'
       ]
     );
 
-    // SF event tomorrow
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(19, 0, 0, 0);
+    // Neighborhood Watch Meeting
+    const watchMeeting = new Date(now);
+    watchMeeting.setDate(watchMeeting.getDate() + 3);
+    watchMeeting.setHours(19, 0, 0, 0);
     await query(
       `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         users[1].id,
-        sfHub.rows[0].id,
-        'Golden Gate Park Flow Jam',
-        'Weekly flow jam at the polo fields. Bring your props and good vibes!',
-        'Golden Gate Park, San Francisco',
-        tomorrow.toISOString(),
-        new Date(tomorrow.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        oakStreet.rows[0].id,
+        'Neighborhood Watch Monthly Meeting',
+        'Monthly safety meeting. We\'ll discuss the recent package thefts and holiday security tips. Coffee provided!',
+        'Oak Street Community Center',
+        watchMeeting.toISOString(),
+        new Date(watchMeeting.getTime() + 1.5 * 60 * 60 * 1000).toISOString(),
         'scheduled'
       ]
     );
 
-    // Canary Islands events over next 4 days
-    for (let i = 0; i < 3; i++) {
-      const eventDate = new Date(now);
-      eventDate.setDate(eventDate.getDate() + i + 1);
-      eventDate.setHours(20, 0, 0, 0); // 8 PM local time
-      
-      const titles = [
-        'Beach Sunset Flow Session',
-        'Fire Spinning Workshop',
-        'Full Moon Flow Gathering'
-      ];
-      const descriptions = [
-        'Meet at Playa de las Teresitas for sunset flow and beach vibes',
-        'Learn fire safety and basic fire poi techniques. Bring your own props!',
-        'Celebrate the full moon with flow, music, and community'
-      ];
-      
-      await query(
-        `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [
-          users[i % 4].id,
-          canaryHub.rows[0].id,
-          titles[i],
-          descriptions[i],
-          'Las Palmas, Gran Canaria',
-          eventDate.toISOString(),
-          new Date(eventDate.getTime() + 2 * 60 * 60 * 1000).toISOString(),
-          'scheduled'
-        ]
-      );
-    }
+    // Christmas Lights Contest Kickoff
+    const lightsKickoff = new Date(now);
+    lightsKickoff.setDate(lightsKickoff.getDate() + 5);
+    lightsKickoff.setHours(18, 0, 0, 0);
+    await query(
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        users[0].id,
+        oakStreet.rows[0].id,
+        'Christmas Lights Contest Kickoff! 🎄',
+        'Annual neighborhood lights competition begins! Sign up, get your category, and may the best display win. Prizes from local businesses!',
+        'Oak Street entrance sign',
+        lightsKickoff.toISOString(),
+        new Date(lightsKickoff.getTime() + 1 * 60 * 60 * 1000).toISOString(),
+        'scheduled'
+      ]
+    );
 
-    // Additional events to double the data
-    const nextWeek = new Date(now);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    nextWeek.setHours(18, 0, 0, 0);
-    
+    // HOA Board Meeting
+    const hoaMeeting = new Date(now);
+    hoaMeeting.setDate(hoaMeeting.getDate() + 7);
+    hoaMeeting.setHours(19, 30, 0, 0);
     await query(
       `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, max_attendees, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         users[2].id,
-        sfHub.rows[0].id,
-        'Beginner Poi Workshop',
-        'Learn the basics of poi spinning! All skill levels welcome. Props provided.',
-        'Mission Dolores Park, San Francisco',
-        nextWeek.toISOString(),
-        new Date(nextWeek.getTime() + 2 * 60 * 60 * 1000).toISOString(),
-        15,
+        pineHills.rows[0].id,
+        'HOA Board Meeting - December',
+        'Agenda: Snow removal contracts, holiday decoration guidelines, 2024 budget review. All residents welcome to attend.',
+        'Pine Hills Clubhouse',
+        hoaMeeting.toISOString(),
+        new Date(hoaMeeting.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        40,
         'scheduled'
       ]
     );
 
-    const inTwoWeeks = new Date(now);
-    inTwoWeeks.setDate(inTwoWeeks.getDate() + 14);
-    inTwoWeeks.setHours(20, 0, 0, 0);
-    
-    await query(
-      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        users[3].id,
-        sfHub.rows[0].id,
-        'LED Flow Night Party',
-        'Bring your LED props for an evening of colorful flow! Music and good vibes guaranteed.',
-        'Ocean Beach, San Francisco',
-        inTwoWeeks.toISOString(),
-        new Date(inTwoWeeks.getTime() + 3 * 60 * 60 * 1000).toISOString(),
-        'scheduled'
-      ]
-    );
-
-    const weekendEvent = new Date(now);
-    weekendEvent.setDate(weekendEvent.getDate() + 5);
-    weekendEvent.setHours(14, 0, 0, 0);
-    
-    await query(
-      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        users[0].id,
-        canaryHub.rows[0].id,
-        'Weekend Flow Retreat',
-        'A full day of flow arts, workshops, and community bonding. Lunch provided!',
-        'Maspalomas Beach, Gran Canaria',
-        weekendEvent.toISOString(),
-        new Date(weekendEvent.getTime() + 6 * 60 * 60 * 1000).toISOString(),
-        'scheduled'
-      ]
-    );
-
-    const lateNight = new Date(now);
-    lateNight.setDate(lateNight.getDate() + 10);
-    lateNight.setHours(22, 0, 0, 0);
-    
+    // Kids Cookie Decorating
+    const cookieParty = new Date(now);
+    cookieParty.setDate(cookieParty.getDate() + 10);
+    cookieParty.setHours(14, 0, 0, 0);
     await query(
       `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, max_attendees, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
-        users[1].id,
-        canaryHub.rows[0].id,
-        'Midnight Fire Circle',
-        'Late night fire spinning for experienced spinners. Safety spotters provided.',
-        'Playa del Ingles, Gran Canaria',
-        lateNight.toISOString(),
-        new Date(lateNight.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        users[0].id,
+        oakStreet.rows[0].id,
+        'Kids Christmas Cookie Decorating Party 🍪',
+        'Bring the little ones for cookie decorating! All supplies provided. Ages 4-12. Parents please stay.',
+        '456 Oak Street - Community Room',
+        cookieParty.toISOString(),
+        new Date(cookieParty.getTime() + 2 * 60 * 60 * 1000).toISOString(),
         20,
         'scheduled'
       ]
     );
 
-    // Create posts in hubs (mostly private to community)
+    // Caroling Walk
+    const caroling = new Date(now);
+    caroling.setDate(caroling.getDate() + 14);
+    caroling.setHours(18, 0, 0, 0);
+    await query(
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        users[3].id,
+        pineHills.rows[0].id,
+        'Neighborhood Caroling Walk 🎵',
+        'Join us for our annual caroling walk through the neighborhood! Hot cocoa stops included. Song sheets provided.',
+        'Pine Hills Entrance Gate',
+        caroling.toISOString(),
+        new Date(caroling.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        'scheduled'
+      ]
+    );
+
+    // New Year's Block Party
+    const newYears = new Date(now);
+    newYears.setDate(newYears.getDate() + 21);
+    newYears.setHours(20, 0, 0, 0);
+    await query(
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, max_attendees, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        users[1].id,
+        oakStreet.rows[0].id,
+        'New Year\'s Eve Block Party 🎉',
+        'Ring in 2024 with your neighbors! BYOB, we\'ll provide appetizers. Countdown at midnight, fireworks viewing from the hill!',
+        'Oak Street Cul-de-sac',
+        newYears.toISOString(),
+        new Date(newYears.getTime() + 5 * 60 * 60 * 1000).toISOString(),
+        50,
+        'scheduled'
+      ]
+    );
+
+    // Garbage/Recycling Schedule Meeting
+    const garbageMeeting = new Date(now);
+    garbageMeeting.setDate(garbageMeeting.getDate() + 4);
+    garbageMeeting.setHours(10, 0, 0, 0);
+    await query(
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        users[2].id,
+        pineHills.rows[0].id,
+        'Holiday Garbage Schedule Info Session',
+        'The city changed the pickup schedule again. Come learn the new dates and proper recycling guidelines. Yes, we\'ll address the bin placement issue.',
+        'Pine Hills Community Center',
+        garbageMeeting.toISOString(),
+        new Date(garbageMeeting.getTime() + 1 * 60 * 60 * 1000).toISOString(),
+        'scheduled'
+      ]
+    );
+
+    // Create posts in neighborhoods (mostly private to community)
     const postContents = [
-      { text: 'Just got my new LED poi! Can\'t wait to try them out tonight 🔥', public: false },
-      { text: 'Anyone want to practice together this weekend?', public: false },
-      { text: 'Check out this new trick I learned! [private session notes]', public: false },
-      { text: 'The sunset session yesterday was amazing! Thanks everyone who came 🌅', public: true },
-      { text: 'Looking for recommendations on fire poi for beginners', public: false },
-      { text: 'Private: Working on a new routine for the competition', public: false },
-      { text: 'Beach flow sessions are the best! Who else loves flowing by the ocean? 🌊', public: false },
-      { text: 'Just ordered some new props from FlowToys!', public: false },
-      { text: 'New to the community! Excited to meet fellow flow artists 🎉', public: true },
-      { text: 'Weekly jam session was incredible! See you all next week', public: false },
-      { text: 'Does anyone have tips for learning contact poi?', public: false },
-      { text: 'Fire spinning under the stars last night was magical ✨', public: false },
-      // Additional posts to double the data
-      { text: 'Learning isolation moves - they\'re harder than they look!', public: false },
-      { text: 'Who\'s bringing fuel to tonight\'s fire jam?', public: false },
-      { text: 'Great meeting everyone at the workshop yesterday!', public: false },
-      { text: 'My new contact staff arrived! Time to practice', public: false },
-      { text: 'Anyone know good spots for practicing downtown?', public: false },
-      { text: 'Sharing my progress video from last month - feedback welcome!', public: false },
-      { text: 'Finally nailed the butterfly! Took me 3 weeks 😅', public: false },
-      { text: 'Reminder: always check your props before fire spinning!', public: false },
-      { text: 'Looking to trade or sell some beginner poi - DM me', public: false },
-      { text: 'The community here is so welcoming! Love you all ❤️', public: false },
-      { text: 'Pro tip: stretch before and after your sessions', public: true },
-      { text: 'Just did my first public performance. So nervous but so worth it!', public: false }
+      // Thanksgiving/Black Friday posts
+      { text: 'Hope everyone had a wonderful Thanksgiving! Our turkey turned out perfect this year 🦃', public: true },
+      { text: 'Black Friday was INSANE at the mall. Never again. Anyone else brave the crowds?', public: false },
+      { text: 'Leftover turkey sandwiches for days! Not complaining though 😋', public: false },
+      { text: 'Did anyone else see that Amazon truck almost hit the mailboxes on Oak Street??', public: false },
+      
+      // Halloween memories
+      { text: 'Still finding candy wrappers in my bushes from Halloween. Please remind your kids! 🎃', public: false },
+      { text: 'The Johnson kids had the BEST costumes this year. That dragon was incredible!', public: true },
+      { text: 'Next year we need to coordinate the haunted house better. Too many houses at once!', public: false },
+      
+      // Christmas prep
+      { text: 'Started putting up lights this weekend! Going big this year ✨🎄', public: true },
+      { text: 'Anyone have a tall ladder I can borrow? Need to reach the roof peak for my star', public: false },
+      { text: 'The Smiths already have their display up. Looking good! Competition is ON', public: false },
+      { text: 'Reminder: Please keep inflatables deflated during the day per HOA guidelines', public: false },
+      
+      // Neighborhood drama/issues
+      { text: 'WHOSE TRASH CANS ARE STILL OUT? Its been 3 days people!! 🗑️', public: false },
+      { text: 'Someone keeps letting their dog do its business on my lawn. Please clean up after your pets!', public: false },
+      { text: 'Package stolen off my porch AGAIN. Getting a Ring camera this week.', public: false },
+      { text: 'Suspicious white van circling the block around 3pm today. Everyone be aware!', public: false },
+      { text: 'Can we PLEASE talk about the leaf blowing at 7am on Saturdays?? Some of us sleep in! 😤', public: false },
+      { text: 'The streetlight on the corner of Oak and Maple is out again. Called the city.', public: false },
+      
+      // Positive community stuff
+      { text: 'Thanks to whoever returned my Amazon package! Faith in neighbors restored ❤️', public: true },
+      { text: 'New neighbors moving in at 789 Oak! Everyone say hi to the Martinez family!', public: true },
+      { text: 'Block party was a huge success! Thanks everyone who brought food!', public: true },
+      { text: 'Lost cat found! Orange tabby is safe at 456 Oak. Owner please claim!', public: true },
+      { text: 'Snow expected this week - anyone need help shoveling? Happy to assist elderly neighbors', public: false },
+      { text: 'Just baked too many cookies. Dropping some off to neighbors! 🍪', public: false }
     ];
 
     for (let i = 0; i < postContents.length; i++) {
-      const hubId = i % 2 === 0 ? sfHub.rows[0].id : canaryHub.rows[0].id;
+      const hubId = i % 2 === 0 ? oakStreet.rows[0].id : pineHills.rows[0].id;
       await query(
         `INSERT INTO posts (user_id, hub_id, content, is_public)
          VALUES ($1, $2, $3, $4)`,
@@ -531,37 +544,36 @@ router.post('/test-data', async (req, res) => {
       );
     }
 
-    // Create some videos for The Loop (with real YouTube video IDs for thumbnails)
+    // Create some videos for The Feed (neighborhood updates with real YouTube video IDs for thumbnails)
     const videos = [
       {
-        title: '3-Beat Weave Tutorial',
-        description: 'Learn the fundamentals of the 3-beat weave with poi',
+        title: 'Oak Street Halloween Parade 2023',
+        description: 'Highlights from our annual Halloween parade! So many great costumes this year 🎃',
         videoUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0'
       },
       {
-        title: 'Sunset Beach Flow Session',
-        description: 'Flow session at the beach during golden hour',
+        title: 'Christmas Lights Tour - Oak Street',
+        description: 'Drive through tour of our neighborhood lights! Vote for your favorite display',
         videoUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk'
       },
       {
-        title: 'Fire Staff Basics',
-        description: 'Getting started with fire staff - safety and basic moves',
+        title: 'Suspicious Vehicle Alert - Nov 15',
+        description: 'Security camera footage of vehicle casing houses. Please be aware!',
         videoUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8'
       },
-      // Additional videos to double the data
       {
-        title: 'LED Hoop Patterns at Night',
-        description: 'Some of my favorite LED hoop patterns filmed at night',
+        title: 'Block Party BBQ Competition Results!',
+        description: 'And the winner of the 3rd Annual Oak Street BBQ Contest is...',
         videoUrl: 'https://www.youtube.com/watch?v=fJ9rUzIMcZQ'
       },
       {
-        title: 'Contact Poi Flow',
-        description: 'Smooth contact poi transitions and isolations',
+        title: 'Lost Dog Reunited with Family!',
+        description: 'Happy ending! Thanks to everyone who shared and helped search ❤️',
         videoUrl: 'https://www.youtube.com/watch?v=RgKAFK5djSk'
       },
       {
-        title: 'Fire Performance Compilation',
-        description: 'Highlights from various fire performances this year',
+        title: 'Pine Hills HOA Meeting Recap - November',
+        description: 'Key decisions from the monthly meeting. Snow removal, decorations, and more.',
         videoUrl: 'https://www.youtube.com/watch?v=OPf0YbXqDm0'
       }
     ];
@@ -572,7 +584,7 @@ router.post('/test-data', async (req, res) => {
          VALUES ($1, $2, $3, $4, $5)`,
         [
           users[i % 4].id,
-          i % 2 === 0 ? sfHub.rows[0].id : canaryHub.rows[0].id,
+          i % 2 === 0 ? oakStreet.rows[0].id : pineHills.rows[0].id,
           videos[i].title,
           videos[i].description,
           videos[i].videoUrl
@@ -580,64 +592,63 @@ router.post('/test-data', async (req, res) => {
       );
     }
 
-    // Create marketplace listings (doubled)
+    // Create marketplace listings (neighbor-to-neighbor sales)
     const listings = [
       {
-        title: 'LED Contact Poi - Like New',
-        description: 'Barely used LED contact poi, perfect condition. Includes charger and carrying case.',
+        title: 'Snow Blower - Honda HS720',
+        description: 'Used 2 seasons, works great! Moving to Florida so no longer needed. Can demo.',
+        price: 450.00,
+        condition: 'good',
+        location: '123 Oak Street'
+      },
+      {
+        title: 'Christmas Decorations Bundle',
+        description: 'Downsizing! 500 lights, 3 inflatables, lawn ornaments. Take it all for one price.',
+        price: 150.00,
+        condition: 'good',
+        location: '456 Pine Hills Dr'
+      },
+      {
+        title: 'Kids Bikes (2) - Ages 6-10',
+        description: 'Schwinn bikes, great condition. Kids outgrew them. $75 each or $120 for both.',
         price: 120.00,
         condition: 'like_new',
-        location: 'San Francisco, CA'
+        location: '789 Oak Street'
       },
       {
-        title: 'Fire Staff - 5ft',
-        description: 'Professional fire staff, 5 feet long. Great for beginners and intermediate spinners.',
-        price: 75.00,
+        title: 'FREE: Moving Boxes',
+        description: 'About 30 boxes, various sizes. Some packing paper too. Must pick up by Saturday!',
+        price: 0.00,
         condition: 'good',
-        location: 'Las Palmas, Gran Canaria'
+        location: '234 Pine Hills Dr'
       },
       {
-        title: 'Hula Hoop Set (3 hoops)',
-        description: 'Set of 3 polypro hoops in different sizes. Perfect for practicing or teaching.',
-        price: 45.00,
+        title: 'Lawn Mower - Toro Recycler',
+        description: 'Self-propelled, 22 inch. Starts right up. Selling because I hired a lawn service.',
+        price: 200.00,
         condition: 'good',
-        location: 'San Francisco, CA'
+        location: '567 Oak Street'
       },
       {
-        title: 'Sock Poi - Handmade',
-        description: 'Hand-sewn sock poi, great for practice. Set of 2.',
-        price: 15.00,
-        condition: 'new',
-        location: 'Las Palmas, Gran Canaria'
-      },
-      // Additional listings to double the data
-      {
-        title: 'FlowToys Capsule Poi',
-        description: 'Used FlowToys capsule poi with rechargeable cores. Still works great!',
-        price: 180.00,
-        condition: 'good',
-        location: 'San Francisco, CA'
-      },
-      {
-        title: 'Practice Fire Fans (pair)',
-        description: 'Practice fans for fire dancing. Kevlar wicks, ready for fuel.',
-        price: 95.00,
+        title: 'Patio Furniture Set',
+        description: '6 piece wicker set with cushions. Used one summer on covered porch. Like new!',
+        price: 350.00,
         condition: 'like_new',
-        location: 'Las Palmas, Gran Canaria'
+        location: '890 Pine Hills Dr'
       },
       {
-        title: 'Dragon Staff - Beginner Friendly',
-        description: 'Great first dragon staff. Lightweight aluminum with grip tape.',
+        title: 'Ring Doorbell + Extra Battery',
+        description: 'Upgraded to wired version. This wireless one works perfectly. Easy install.',
         price: 65.00,
-        condition: 'good',
-        location: 'San Francisco, CA'
+        condition: 'like_new',
+        location: '321 Oak Street'
       },
       {
-        title: 'LED Levitation Wand',
-        description: 'Flowtoys levitation wand with multiple color modes. Barely used.',
-        price: 140.00,
+        title: 'Thanksgiving Turkey Fryer',
+        description: 'Used twice, still has original box. Makes amazing turkey! Safety features.',
+        price: 80.00,
         condition: 'like_new',
-        location: 'Las Palmas, Gran Canaria'
+        location: '654 Pine Hills Dr'
       }
     ];
 
@@ -649,7 +660,7 @@ router.post('/test-data', async (req, res) => {
          RETURNING id`,
         [
           users[i % 4].id,
-          i % 2 === 0 ? sfHub.rows[0].id : canaryHub.rows[0].id,
+          i % 2 === 0 ? oakStreet.rows[0].id : pineHills.rows[0].id,
           listings[i].title,
           listings[i].description,
           listings[i].price,
@@ -664,10 +675,10 @@ router.post('/test-data', async (req, res) => {
     // Add comments to marketplace listings
     const comments = [
       'Is this still available?',
-      'Would you ship to the mainland?',
-      'Great price! I\'m interested',
-      'Do you have any videos of these in action?',
-      'I\'ll take them! Can we meet this weekend?'
+      'Can you hold it until Saturday? I can pick up then.',
+      'Great price! My husband is interested.',
+      'Would you take $50? Cash today.',
+      'Do you still have this? I live on Oak Street - easy pickup!'
     ];
 
     for (let i = 0; i < listingIds.length; i++) {
@@ -688,8 +699,8 @@ router.post('/test-data', async (req, res) => {
       message: 'Test data created',
       summary: {
         users: users.length,
-        hubs: 2,
-        events: 9,
+        neighborhoods: 2,
+        events: 8,
         posts: postContents.length,
         videos: videos.length,
         listings: listings.length,
