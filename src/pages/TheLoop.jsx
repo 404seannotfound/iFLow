@@ -110,9 +110,9 @@ export default function TheLoop() {
           </h1>
           <p className="text-gray-400">Neighborhood updates, photos, and videos from your community</p>
         </div>
-        {token && (
+        {token && !showUploadForm && (
           <button
-            onClick={() => setShowUploadForm(!showUploadForm)}
+            onClick={() => setShowUploadForm(true)}
             className="btn-primary flex items-center gap-2"
           >
             <Upload size={20} />
