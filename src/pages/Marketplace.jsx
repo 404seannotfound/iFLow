@@ -94,9 +94,9 @@ export default function Marketplace() {
           </h1>
           <p className="text-gray-400">Buy, sell, and trade flow props</p>
         </div>
-        {token && (
+        {token && !showCreateForm && (
           <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
+            onClick={() => setShowCreateForm(true)}
             className="btn-primary flex items-center gap-2"
           >
             <Plus size={20} />

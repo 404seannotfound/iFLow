@@ -110,9 +110,9 @@ export default function TheLoop() {
           </h1>
           <p className="text-gray-400">Vertical video feed for flow arts skill sharing</p>
         </div>
-        {token && (
+        {token && !showUploadForm && (
           <button
-            onClick={() => setShowUploadForm(!showUploadForm)}
+            onClick={() => setShowUploadForm(true)}
             className="btn-primary flex items-center gap-2"
           >
             <Upload size={20} />

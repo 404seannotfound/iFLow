@@ -79,9 +79,9 @@ export default function Hubs() {
           </h1>
           <p className="text-gray-400">Connect with local flow arts communities</p>
         </div>
-        {token && (
+        {token && !showCreateForm && (
           <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
+            onClick={() => setShowCreateForm(true)}
             className="btn-primary flex items-center gap-2"
           >
             <Plus size={20} />

@@ -303,30 +303,28 @@ export default function Events() {
           </h1>
           <p className="text-gray-400">Schedule and discover flow arts events</p>
         </div>
-        {token && (
+        {token && !showCreateForm && (
           <button
             onClick={() => {
-              if (!showCreateForm) {
-                const defaultStart = getDefaultDateTime();
-                const defaultEnd = getDefaultDateTime();
-                defaultEnd.hour = (parseInt(defaultStart.hour) + 2).toString().padStart(2, '0');
-                
-                setFormData({
-                  title: '',
-                  description: '',
-                  location: '',
-                  latitude: null,
-                  longitude: null,
-                  start_date: defaultStart.date,
-                  start_hour: defaultStart.hour,
-                  start_minute: defaultStart.minute,
-                  end_date: defaultEnd.date,
-                  end_hour: defaultEnd.hour,
-                  end_minute: defaultEnd.minute,
-                  max_participants: ''
-                });
-              }
-              setShowCreateForm(!showCreateForm);
+              const defaultStart = getDefaultDateTime();
+              const defaultEnd = getDefaultDateTime();
+              defaultEnd.hour = (parseInt(defaultStart.hour) + 2).toString().padStart(2, '0');
+              
+              setFormData({
+                title: '',
+                description: '',
+                location: '',
+                latitude: null,
+                longitude: null,
+                start_date: defaultStart.date,
+                start_hour: defaultStart.hour,
+                start_minute: defaultStart.minute,
+                end_date: defaultEnd.date,
+                end_hour: defaultEnd.hour,
+                end_minute: defaultEnd.minute,
+                max_participants: ''
+              });
+              setShowCreateForm(true);
             }}
             className="btn-primary flex items-center gap-2"
           >
