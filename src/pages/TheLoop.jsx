@@ -3,6 +3,7 @@ import { Video, Plus, Heart, Play, MessageCircle, Eye, Upload, ExternalLink } fr
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import Comments from '../components/Comments';
+import RichTextEditor from '../components/RichTextEditor';
 
 export default function TheLoop() {
   const [videos, setVideos] = useState([]);
@@ -138,12 +139,11 @@ export default function TheLoop() {
 
             <div>
               <label className="block text-sm font-medium mb-2">Description</label>
-              <textarea
+              <RichTextEditor
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="input-field"
-                rows="3"
-                placeholder="Describe your video..."
+                onChange={(val) => setFormData({ ...formData, description: val })}
+                placeholder="Describe your video... (paste screenshots here!)"
+                compact={true}
               />
             </div>
 
@@ -226,7 +226,10 @@ export default function TheLoop() {
 
               <h3 className="text-lg font-bold mb-2">{video.title}</h3>
               {video.description && (
-                <p className="text-sm text-gray-400 mb-4 line-clamp-2">{video.description}</p>
+                <div 
+                  className="prose prose-invert prose-sm max-w-none mb-4 text-gray-400 line-clamp-3"
+                  dangerouslySetInnerHTML={{ __html: video.description }}
+                />
               )}
 
               <div className="space-y-2">

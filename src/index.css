@@ -155,6 +155,45 @@
   fill: #a855f7;
 }
 
+/* Compact mode for rich text editor */
+.rich-text-compact .ql-container {
+  min-height: 100px;
+}
+
+.rich-text-compact .ql-editor {
+  min-height: 100px;
+}
+
+/* Images in rich text editor */
+.rich-text-editor .ql-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+/* Images in prose content */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+/* Dropdown menus in rich text editor */
+.ql-picker-options {
+  background: #1a1a2e !important;
+  border: 1px solid #4a5568 !important;
+}
+
+.ql-picker-item {
+  color: #ffffff !important;
+}
+
+.ql-picker-item:hover {
+  color: #a855f7 !important;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

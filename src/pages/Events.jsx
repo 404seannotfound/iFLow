@@ -6,6 +6,7 @@ import MapPicker from '../components/MapPicker';
 import MiniMap from '../components/MiniMap';
 import Comments from '../components/Comments';
 import { formatLocalDateTime } from '../utils/dateUtils';
+import RichTextEditor from '../components/RichTextEditor';
 
 export default function Events() {
   const [events, setEvents] = useState([]);
@@ -353,12 +354,11 @@ export default function Events() {
 
             <div>
               <label className="block text-sm font-medium mb-2">Description</label>
-              <textarea
+              <RichTextEditor
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="input-field"
-                rows="3"
-                placeholder="Join us for a fun flow session..."
+                onChange={(val) => setFormData({ ...formData, description: val })}
+                placeholder="Join us for a fun flow session... (paste screenshots here!)"
+                compact={true}
               />
             </div>
 
@@ -560,7 +560,10 @@ export default function Events() {
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
                   {event.description && (
-                    <p className="text-gray-400 mb-4">{event.description}</p>
+                    <div 
+                      className="prose prose-invert prose-sm max-w-none mb-4 text-gray-400"
+                      dangerouslySetInnerHTML={{ __html: event.description }}
+                    />
                   )}
                 </div>
                 {token && user && event.created_by === user.id && (

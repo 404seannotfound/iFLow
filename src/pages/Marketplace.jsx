@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import ImageUpload from '../components/ImageUpload';
 import Comments from '../components/Comments';
+import RichTextEditor from '../components/RichTextEditor';
 
 export default function Marketplace() {
   const navigate = useNavigate();
@@ -122,12 +123,11 @@ export default function Marketplace() {
 
             <div>
               <label className="block text-sm font-medium mb-2">Description</label>
-              <textarea
+              <RichTextEditor
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="input-field"
-                rows="3"
-                placeholder="Describe your item..."
+                onChange={(val) => setFormData({ ...formData, description: val })}
+                placeholder="Describe your item... (paste screenshots here!)"
+                compact={true}
               />
             </div>
 
@@ -212,7 +212,10 @@ export default function Marketplace() {
               <div className="mb-4">
                 <h3 className="text-xl font-bold mb-2">{listing.title}</h3>
                 {listing.description && (
-                  <p className="text-sm text-gray-400 line-clamp-2">{listing.description}</p>
+                  <div 
+                    className="prose prose-invert prose-sm max-w-none text-gray-400 line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: listing.description }}
+                  />
                 )}
               </div>
 
