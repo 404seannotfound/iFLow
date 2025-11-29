@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, MapPin, Clock, Users, Map, MessageCircle, Edit2 } from 'lucide-react';
+import { Calendar, Plus, MapPin, Clock, Users, Map, MessageCircle, Edit2, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import MapPicker from '../components/MapPicker';
@@ -17,9 +17,10 @@ export default function Events() {
   const [editingEvent, setEditingEvent] = useState(null);
   
   // Helper to combine date and time into ISO string
+  // Parse date parts explicitly to avoid UTC vs local timezone issues
   const combineDateTime = (date, hour, minute) => {
-    const d = new Date(date);
-    d.setHours(parseInt(hour), parseInt(minute), 0, 0);
+    const [year, month, day] = date.split('-').map(Number);
+    const d = new Date(year, month - 1, day, parseInt(hour), parseInt(minute), 0, 0);
     return d.toISOString();
   };
   
@@ -40,8 +41,12 @@ export default function Events() {
   const getDefaultDateTime = () => {
     const now = new Date();
     now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15); // Round to next 15 min
+    // Use local date components to avoid UTC offset issues
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
     return {
-      date: now.toISOString().split('T')[0],
+      date: `${year}-${month}-${day}`,
       hour: now.getHours().toString().padStart(2, '0'),
       minute: now.getMinutes().toString().padStart(2, '0')
     };
@@ -266,6 +271,20 @@ export default function Events() {
     }
   };
 
+  const handleDeleteEvent = async (eventId) => {
+    if (!confirm('Are you sure you want to delete this event? This cannot be undone.')) return;
+    
+    try {
+      await axios.delete(`/api/events/${eventId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      loadEvents();
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      alert('Failed to delete event: ' + (error.response?.data?.error?.message || error.message));
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto py-8">
@@ -486,8 +505,12 @@ export default function Events() {
                     location: '',
                     latitude: null,
                     longitude: null,
-                    start_time: getDefaultStartTime(),
-                    end_time: getDefaultEndTime(getDefaultStartTime()),
+                    start_date: '',
+                    start_hour: '18',
+                    start_minute: '00',
+                    end_date: '',
+                    end_hour: '20',
+                    end_minute: '00',
                     max_participants: ''
                   });
                 }}
@@ -514,8 +537,12 @@ export default function Events() {
                     location: '',
                     latitude: null,
                     longitude: null,
-                    start_time: getDefaultStartTime(),
-                    end_time: getDefaultEndTime(getDefaultStartTime()),
+                    start_date: '',
+                    start_hour: '18',
+                    start_minute: '00',
+                    end_date: '',
+                    end_hour: '20',
+                    end_minute: '00',
                     max_participants: ''
                   });
                   setShowCreateForm(true);
@@ -537,13 +564,22 @@ export default function Events() {
                   )}
                 </div>
                 {token && user && event.created_by === user.id && (
-                  <button
-                    onClick={() => handleEditEvent(event)}
-                    className="btn-secondary flex items-center gap-2"
-                  >
-                    <Edit2 size={16} />
-                    Edit
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditEvent(event)}
+                      className="btn-secondary flex items-center gap-2"
+                    >
+                      <Edit2 size={16} />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteEvent(event.id)}
+                      className="btn-secondary flex items-center gap-2 text-red-400 hover:text-red-300 hover:border-red-500/50"
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
                 )}
               </div>
 

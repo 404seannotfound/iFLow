@@ -414,20 +414,112 @@ router.post('/test-data', async (req, res) => {
       );
     }
 
-    // Create posts in hubs (mostly public for discovery)
+    // Additional events to double the data
+    const nextWeek = new Date(now);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    nextWeek.setHours(18, 0, 0, 0);
+    
+    await query(
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, max_attendees, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        users[2].id,
+        sfHub.rows[0].id,
+        'Beginner Poi Workshop',
+        'Learn the basics of poi spinning! All skill levels welcome. Props provided.',
+        'Mission Dolores Park, San Francisco',
+        nextWeek.toISOString(),
+        new Date(nextWeek.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        15,
+        'scheduled'
+      ]
+    );
+
+    const inTwoWeeks = new Date(now);
+    inTwoWeeks.setDate(inTwoWeeks.getDate() + 14);
+    inTwoWeeks.setHours(20, 0, 0, 0);
+    
+    await query(
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        users[3].id,
+        sfHub.rows[0].id,
+        'LED Flow Night Party',
+        'Bring your LED props for an evening of colorful flow! Music and good vibes guaranteed.',
+        'Ocean Beach, San Francisco',
+        inTwoWeeks.toISOString(),
+        new Date(inTwoWeeks.getTime() + 3 * 60 * 60 * 1000).toISOString(),
+        'scheduled'
+      ]
+    );
+
+    const weekendEvent = new Date(now);
+    weekendEvent.setDate(weekendEvent.getDate() + 5);
+    weekendEvent.setHours(14, 0, 0, 0);
+    
+    await query(
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        users[0].id,
+        canaryHub.rows[0].id,
+        'Weekend Flow Retreat',
+        'A full day of flow arts, workshops, and community bonding. Lunch provided!',
+        'Maspalomas Beach, Gran Canaria',
+        weekendEvent.toISOString(),
+        new Date(weekendEvent.getTime() + 6 * 60 * 60 * 1000).toISOString(),
+        'scheduled'
+      ]
+    );
+
+    const lateNight = new Date(now);
+    lateNight.setDate(lateNight.getDate() + 10);
+    lateNight.setHours(22, 0, 0, 0);
+    
+    await query(
+      `INSERT INTO events (created_by, hub_id, title, description, location, start_time, end_time, max_attendees, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        users[1].id,
+        canaryHub.rows[0].id,
+        'Midnight Fire Circle',
+        'Late night fire spinning for experienced spinners. Safety spotters provided.',
+        'Playa del Ingles, Gran Canaria',
+        lateNight.toISOString(),
+        new Date(lateNight.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        20,
+        'scheduled'
+      ]
+    );
+
+    // Create posts in hubs (mostly private to community)
     const postContents = [
-      { text: 'Just got my new LED poi! Can\'t wait to try them out tonight 🔥', public: true },
-      { text: 'Anyone want to practice together this weekend?', public: true },
+      { text: 'Just got my new LED poi! Can\'t wait to try them out tonight 🔥', public: false },
+      { text: 'Anyone want to practice together this weekend?', public: false },
       { text: 'Check out this new trick I learned! [private session notes]', public: false },
       { text: 'The sunset session yesterday was amazing! Thanks everyone who came 🌅', public: true },
-      { text: 'Looking for recommendations on fire poi for beginners', public: true },
+      { text: 'Looking for recommendations on fire poi for beginners', public: false },
       { text: 'Private: Working on a new routine for the competition', public: false },
-      { text: 'Beach flow sessions are the best! Who else loves flowing by the ocean? 🌊', public: true },
-      { text: 'Just ordered some new props from FlowToys!', public: true },
+      { text: 'Beach flow sessions are the best! Who else loves flowing by the ocean? 🌊', public: false },
+      { text: 'Just ordered some new props from FlowToys!', public: false },
       { text: 'New to the community! Excited to meet fellow flow artists 🎉', public: true },
-      { text: 'Weekly jam session was incredible! See you all next week', public: true },
-      { text: 'Does anyone have tips for learning contact poi?', public: true },
-      { text: 'Fire spinning under the stars last night was magical ✨', public: true }
+      { text: 'Weekly jam session was incredible! See you all next week', public: false },
+      { text: 'Does anyone have tips for learning contact poi?', public: false },
+      { text: 'Fire spinning under the stars last night was magical ✨', public: false },
+      // Additional posts to double the data
+      { text: 'Learning isolation moves - they\'re harder than they look!', public: false },
+      { text: 'Who\'s bringing fuel to tonight\'s fire jam?', public: false },
+      { text: 'Great meeting everyone at the workshop yesterday!', public: false },
+      { text: 'My new contact staff arrived! Time to practice', public: false },
+      { text: 'Anyone know good spots for practicing downtown?', public: false },
+      { text: 'Sharing my progress video from last month - feedback welcome!', public: false },
+      { text: 'Finally nailed the butterfly! Took me 3 weeks 😅', public: false },
+      { text: 'Reminder: always check your props before fire spinning!', public: false },
+      { text: 'Looking to trade or sell some beginner poi - DM me', public: false },
+      { text: 'The community here is so welcoming! Love you all ❤️', public: false },
+      { text: 'Pro tip: stretch before and after your sessions', public: true },
+      { text: 'Just did my first public performance. So nervous but so worth it!', public: false }
     ];
 
     for (let i = 0; i < postContents.length; i++) {
@@ -439,44 +531,56 @@ router.post('/test-data', async (req, res) => {
       );
     }
 
-    // Create some videos for The Loop
+    // Create some videos for The Loop (with real YouTube video IDs for thumbnails)
     const videos = [
       {
         title: '3-Beat Weave Tutorial',
         description: 'Learn the fundamentals of the 3-beat weave with poi',
-        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        thumbnailUrl: null
+        videoUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0'
       },
       {
         title: 'Sunset Beach Flow Session',
         description: 'Flow session at the beach during golden hour',
-        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        thumbnailUrl: null
+        videoUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk'
       },
       {
         title: 'Fire Staff Basics',
         description: 'Getting started with fire staff - safety and basic moves',
-        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        thumbnailUrl: null
+        videoUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8'
+      },
+      // Additional videos to double the data
+      {
+        title: 'LED Hoop Patterns at Night',
+        description: 'Some of my favorite LED hoop patterns filmed at night',
+        videoUrl: 'https://www.youtube.com/watch?v=fJ9rUzIMcZQ'
+      },
+      {
+        title: 'Contact Poi Flow',
+        description: 'Smooth contact poi transitions and isolations',
+        videoUrl: 'https://www.youtube.com/watch?v=RgKAFK5djSk'
+      },
+      {
+        title: 'Fire Performance Compilation',
+        description: 'Highlights from various fire performances this year',
+        videoUrl: 'https://www.youtube.com/watch?v=OPf0YbXqDm0'
       }
     ];
 
     for (let i = 0; i < videos.length; i++) {
       await query(
-        `INSERT INTO videos (user_id, hub_id, title, description, video_url, thumbnail_url)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
+        `INSERT INTO videos (user_id, hub_id, title, description, video_url)
+         VALUES ($1, $2, $3, $4, $5)`,
         [
           users[i % 4].id,
           i % 2 === 0 ? sfHub.rows[0].id : canaryHub.rows[0].id,
           videos[i].title,
           videos[i].description,
-          videos[i].videoUrl,
-          videos[i].thumbnailUrl
+          videos[i].videoUrl
         ]
       );
     }
 
-    // Create marketplace listings
+    // Create marketplace listings (doubled)
     const listings = [
       {
         title: 'LED Contact Poi - Like New',
@@ -504,6 +608,35 @@ router.post('/test-data', async (req, res) => {
         description: 'Hand-sewn sock poi, great for practice. Set of 2.',
         price: 15.00,
         condition: 'new',
+        location: 'Las Palmas, Gran Canaria'
+      },
+      // Additional listings to double the data
+      {
+        title: 'FlowToys Capsule Poi',
+        description: 'Used FlowToys capsule poi with rechargeable cores. Still works great!',
+        price: 180.00,
+        condition: 'good',
+        location: 'San Francisco, CA'
+      },
+      {
+        title: 'Practice Fire Fans (pair)',
+        description: 'Practice fans for fire dancing. Kevlar wicks, ready for fuel.',
+        price: 95.00,
+        condition: 'like_new',
+        location: 'Las Palmas, Gran Canaria'
+      },
+      {
+        title: 'Dragon Staff - Beginner Friendly',
+        description: 'Great first dragon staff. Lightweight aluminum with grip tape.',
+        price: 65.00,
+        condition: 'good',
+        location: 'San Francisco, CA'
+      },
+      {
+        title: 'LED Levitation Wand',
+        description: 'Flowtoys levitation wand with multiple color modes. Barely used.',
+        price: 140.00,
+        condition: 'like_new',
         location: 'Las Palmas, Gran Canaria'
       }
     ];
@@ -556,11 +689,12 @@ router.post('/test-data', async (req, res) => {
       summary: {
         users: users.length,
         hubs: 2,
-        events: 5,
+        events: 9,
         posts: postContents.length,
         videos: videos.length,
         listings: listings.length,
-        publicPosts: postContents.filter(p => p.public).length
+        publicPosts: postContents.filter(p => p.public).length,
+        privatePosts: postContents.filter(p => !p.public).length
       }
     });
 

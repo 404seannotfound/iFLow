@@ -20,7 +20,7 @@ export default function Marketplace() {
     location: '',
     imageUrl: null
   });
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
 
   useEffect(() => {
     loadListings();

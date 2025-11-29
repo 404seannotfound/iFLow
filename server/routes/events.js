@@ -168,4 +168,34 @@ router.put('/:eventId', authenticateToken, async (req, res) => {
   }
 });
 
+// Delete event
+router.delete('/:eventId', authenticateToken, async (req, res) => {
+  try {
+    // Check if user owns the event
+    const ownerCheck = await query(
+      'SELECT created_by FROM events WHERE id = $1',
+      [req.params.eventId]
+    );
+
+    if (ownerCheck.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Event not found' } });
+    }
+
+    if (ownerCheck.rows[0].created_by !== req.user.userId) {
+      return res.status(403).json({ error: { message: 'You can only delete your own events' } });
+    }
+
+    // Delete RSVPs first (foreign key constraint)
+    await query('DELETE FROM event_rsvps WHERE event_id = $1', [req.params.eventId]);
+    
+    // Delete the event
+    await query('DELETE FROM events WHERE id = $1', [req.params.eventId]);
+
+    res.json({ message: 'Event deleted successfully' });
+  } catch (error) {
+    console.error('Delete event error:', error);
+    res.status(500).json({ error: { message: 'Failed to delete event' } });
+  }
+});
+
 export default router;

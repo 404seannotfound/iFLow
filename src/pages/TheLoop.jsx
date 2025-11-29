@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Video, Plus, Heart, Play, MessageCircle, Eye, Upload } from 'lucide-react';
+import { Video, Plus, Heart, Play, MessageCircle, Eye, Upload, ExternalLink } from 'lucide-react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import Comments from '../components/Comments';
@@ -15,6 +15,33 @@ export default function TheLoop() {
     video_url: ''
   });
   const { token } = useAuthStore();
+
+  // Extract video ID and generate thumbnail for YouTube/Vimeo
+  const getVideoThumbnail = (url) => {
+    if (!url) return null;
+    
+    // YouTube patterns
+    const youtubePatterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/
+    ];
+    
+    for (const pattern of youtubePatterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg`;
+      }
+    }
+    
+    // Vimeo pattern
+    const vimeoMatch = url.match(/vimeo\.com\/([0-9]+)/);
+    if (vimeoMatch) {
+      // Vimeo requires API call for thumbnail, use placeholder
+      return null;
+    }
+    
+    return null;
+  };
 
   useEffect(() => {
     loadVideos();
@@ -168,9 +195,34 @@ export default function TheLoop() {
         ) : (
           videos.map((video) => (
             <div key={video.id} className="card hover:border-purple-500/50 transition-colors">
-              <div className="aspect-video bg-gray-800 rounded-lg mb-4 flex items-center justify-center">
-                <Video className="text-gray-600" size={48} />
-              </div>
+              <a 
+                href={video.video_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block aspect-video bg-gray-800 rounded-lg mb-4 relative overflow-hidden group"
+              >
+                {getVideoThumbnail(video.video_url) ? (
+                  <>
+                    <img 
+                      src={getVideoThumbnail(video.video_url)} 
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+                        <Play className="text-white" size={32} fill="white" />
+                      </div>
+                    </div>
+                    <div className="absolute top-2 right-2 bg-black/60 rounded px-2 py-1">
+                      <ExternalLink size={14} className="text-white" />
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Video className="text-gray-600" size={48} />
+                  </div>
+                )}
+              </a>
 
               <h3 className="text-lg font-bold mb-2">{video.title}</h3>
               {video.description && (
